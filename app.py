@@ -166,17 +166,11 @@ def show_users():
     users = User.query.all()
     users_data = [{"id": user.id, "username": user.username, "data": user.data} for user in users]
     return {"users": users_data}
+
+# 🔹 Route: แสดงหน้า Index
 @app.route('/index')
 def index():
     return render_template('index.html')
-
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-@app.route("/")
-def index():
-    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)  # ✅ ใช้เฉพาะตอนรัน local

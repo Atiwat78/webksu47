@@ -22,20 +22,21 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-            <!-- 🔹 ปรับช่องเลือก Role -->
-            <label for="role">Login as:</label>
+            <!-- 🔹 เปลี่ยน Role เป็นปุ่ม Radio -->
+            <label>เข้าสู่ระบบเป็น:</label>
             <div class="role-select">
-                <select id="role" name="role" required>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
+                <input type="radio" id="user" name="role" value="user" required>
+                <label for="user">User</label>
+
+                <input type="radio" id="admin" name="role" value="admin" required>
+                <label for="admin">Admin</label>
             </div>
 
             <button type="submit">Login</button>
         </form>
 
         <div class="register-link">
-            <p>ยังไม่มีผู้ใช้งาน? <a href="/register">สมัครสมาชิก</a></p>
+            <p>ยังไม่มีบัญชี? <a href="/register">สมัครสมาชิก</a></p>
         </div>
     </div>
 </body>

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>สมัครสมาชิก</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" type="image/x-icon">
 </head>
 <body>
     <div class="login-container">
@@ -12,15 +13,30 @@
         <div class="logo">
             <img src="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" alt="Logo">
         </div>
-    <h1>Register</h1>
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <button type="submit">Register</button>
-    </form>
-    
-    <a href="/login">Back to Login</a>
+        
+        <h1>สมัครสมาชิก</h1>
+        <form method="POST" action="{{ url_for('register') }}">
+            <label for="username">ชื่อผู้ใช้</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+
+            <label for="password">รหัสผ่าน</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <!-- 🔹 ช่องเลือกประเภทบัญชี -->
+            <label for="role">เลือกประเภทบัญชี:</label>
+            <div class="role-select">
+                <select id="role" name="role" required>
+                    <option value="user" selected>ผู้ใช้ทั่วไป</option>
+                    <option value="admin">ผู้ดูแลระบบ</option>
+                </select>
+            </div>
+
+            <button type="submit">สมัครสมาชิก</button>
+        </form>
+
+        <div class="register-link">
+            <p>มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a></p>
+        </div>
+    </div>
 </body>
 </html>

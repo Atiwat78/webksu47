@@ -1,40 +1,32 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, send_file, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 
-# 🔹 ใช้ bcrypt หรือเก็บเป็น plaintext (เปลี่ยนเป็น True เพื่อให้เข้ารหัสรหัสผ่าน)
-USE_BCRYPT = False  # เปลี่ยนเป็น True หากต้องการเข้ารหัสรหัสผ่าน
-
-if USE_BCRYPT:
-    from flask_bcrypt import Bcrypt
-
-# 🔹 กำหนดค่าแอป
+# 🔹 ตั้งค่าแอป
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 
-# 🔹 กำหนดค่า SQLite Database
+# 🔹 ตั้งค่า SQLite Database
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 🔹 กำหนดค่าอัปโหลดไฟล์
+# 🔹 ตั้งค่าอัปโหลดไฟล์
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static/uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
-# 🔹 เรียกใช้ SQLAlchemy และ Bcrypt
+# 🔹 เรียกใช้ SQLAlchemy
 db = SQLAlchemy(app)
-if USE_BCRYPT:
-    bcrypt = Bcrypt(app)
 
 # 🔹 สร้าง Model สำหรับผู้ใช้
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)  # เก็บเป็น plaintext หรือ bcrypt hash
-    data = db.Column(db.Text, nullable=True)
+    password = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(10), nullable=False, default='user')  # 'admin' หรือ 'user'
     files = db.relationship('File', backref='user', lazy=True)
 
 # 🔹 สร้าง Model สำหรับไฟล์
@@ -52,12 +44,11 @@ with app.app_context():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# 🔹 Route: หน้าแรก
+# 🔹 Route: หน้าแรก (เปิดมาให้ไปที่หน้า Login)
 @app.route('/')
-def home():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
+def index():
     return redirect(url_for('login'))
+
 
 # 🔹 Route: หน้า Login
 @app.route('/login', methods=['GET', 'POST'])
@@ -67,17 +58,16 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
 
-        if user:
-            if USE_BCRYPT:
-                if bcrypt.check_password_hash(user.password, password):
-                    session['user_id'] = user.id
-                    return redirect(url_for('dashboard'))
-            else:
-                if user.password == password:  # เก็บรหัสผ่านเป็น Plaintext
-                    session['user_id'] = user.id
-                    return redirect(url_for('dashboard'))
-        
-        return 'Invalid username or password', 401
+        if user and user.password == password:
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['role'] = user.role
+            if user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('user_dashboard'))
+
+        flash("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!", "danger")
+
     return render_template('login.html')
 
 # 🔹 Route: หน้า Register
@@ -86,91 +76,114 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        role = request.form['role']  # รับค่าประเภทบัญชี ('admin' หรือ 'user')
 
-        if USE_BCRYPT:
-            password = bcrypt.generate_password_hash(password).decode('utf-8')  # Hash Password
-
-        new_user = User(username=username, password=password, data="")
+        new_user = User(username=username, password=password, role=role)
         db.session.add(new_user)
         db.session.commit()
+
+        flash("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ", "success")
         return redirect(url_for('login'))
+
     return render_template('register.html')
 
-# 🔹 Route: Dashboard (รองรับอัปโหลดไฟล์ 3 ช่อง)
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
+# 🔹 Route: Dashboard สำหรับ User
+@app.route('/user_dashboard', methods=['GET', 'POST'])
+def user_dashboard():
+    if 'user_id' not in session or session.get('role') != 'user':
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+
+    if request.method == 'POST':
+        for i in range(1, 4):
+            file = request.files.get(f'file{i}')
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+
+                new_file = File(filename=filename, file_path=file_path, user_id=user.id)
+                db.session.add(new_file)
+                db.session.commit()
+
+    files = File.query.filter_by(user_id=user.id).all()
+    return render_template('user_dashboard.html', username=user.username, files=files)
+
+# 🔹 Route: Dashboard สำหรับ Admin
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    users = User.query.all()
+    files = File.query.all()
+    return render_template('admin_dashboard.html', username=session['username'], users=users, files=files)
+
+# 🔹 Route: ลบ User (Admin เท่านั้น)
+@app.route('/delete_user/<int:user_id>')
+def delete_user(user_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        flash("ลบผู้ใช้สำเร็จ!", "success")
+
+    return redirect(url_for('admin_dashboard'))
+
+# 🔹 Route: ลบไฟล์
+@app.route('/delete_file/<int:file_id>')
+def delete_file(file_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    file = File.query.get(file_id)
+    if file and (session.get('role') == 'admin' or file.user_id == session['user_id']):
+        os.remove(file.file_path)
+        db.session.delete(file)
+        db.session.commit()
+        flash("ลบไฟล์สำเร็จ!", "success")
+
+    return redirect(url_for('user_dashboard') if session.get('role') == 'user' else 'admin_dashboard')
+
+# 🔹 Route: Logout
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
+@app.route('/profile')
+def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
     user = User.query.get(session['user_id'])
     if not user:
+        flash("ไม่พบข้อมูลผู้ใช้", "danger")
         return redirect(url_for('login'))
 
-    if request.method == 'POST':
-        # ✅ บันทึกข้อมูล "Your Data"
-        if 'save_data' in request.form:
-            user.data = request.form.get('data', '')  
-            db.session.commit()
-            print(f"✅ บันทึกข้อมูลสำเร็จ: {user.data}") 
-
-        # ✅ อัปโหลดไฟล์จากทั้ง 3 ช่อง
-        for i in range(1, 4):  # ลูปตรวจสอบช่องอัปโหลด file1, file2, file3
-            file_key = f'file{i}'
-            if file_key in request.files:
-                file = request.files[file_key]
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-                    # ✅ ตรวจสอบว่ามีไฟล์นี้อยู่แล้วหรือไม่ ถ้ามีให้เปลี่ยนชื่อใหม่
-                    counter = 1
-                    while os.path.exists(file_path):
-                        filename = f"{counter}_{secure_filename(file.filename)}"
-                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                        counter += 1
-
-                    file.save(file_path)
-
-                    # ✅ บันทึกไฟล์ลงฐานข้อมูล
-                    new_file = File(filename=filename, file_path=file_path, user_id=user.id)
-                    db.session.add(new_file)
-                    db.session.commit()
-                    print(f"✅ อัปโหลดไฟล์สำเร็จ: {filename}")
-
-    # ✅ ดึงไฟล์ที่เคยอัปโหลดมาแสดง
     files = File.query.filter_by(user_id=user.id).all()
+    return render_template('profile.html', username=user.username, role=user.role, files=files)
 
-    return render_template('dashboard.html', username=user.username, data=user.data, files=files)
+# หน้าลิ้งปุ่ม Navbar status
 
-# 🔹 Route: Download File
-@app.route('/download/<int:file_id>')
-def download_file(file_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+@app.route('/status')
+def status():
+    return render_template('status.html')
 
-    file = File.query.filter_by(id=file_id, user_id=session['user_id']).first()
-    if not file:
-        return "File not found or you don't have permission to access it", 404
 
-    return send_file(file.file_path, as_attachment=True, download_name=file.filename)
 
-# 🔹 Route: Logout
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('login'))
+# หน้าลิ้งปุ่ม Navbar Home
+@app.route('/user_dashboard')
+def home():
+    return render_template('user_dashboard.html')
 
-# 🔹 Route: แสดงข้อมูลผู้ใช้ทั้งหมดใน Database (ใช้สำหรับ Debug)
-@app.route('/users')
-def show_users():
-    users = User.query.all()
-    users_data = [{"id": user.id, "username": user.username, "data": user.data} for user in users]
-    return {"users": users_data}
 
-# 🔹 Route: แสดงหน้า Index
-@app.route('/index')
-def index():
-    return render_template('index.html')
+
 
 if __name__ == "__main__":
-    app.run(debug=True)  # ✅ ใช้เฉพาะตอนรัน local
+    app.run(debug=True)

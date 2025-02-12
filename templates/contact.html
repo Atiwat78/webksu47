@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรไฟล์ผู้ใช้</title>
+    <title>ติดต่อเรา</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Google Font - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -65,8 +65,8 @@
             transform: scale(1.05);
         }
 
-        /* Profile Container */
-        .profile-container {
+        /* Contact Card */
+        .contact-container {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 12px;
@@ -78,7 +78,7 @@
             box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
         }
 
-        .profile-container:hover {
+        .contact-container:hover {
             transform: translateY(-5px);
         }
 
@@ -95,25 +95,24 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         }
 
-        /* รายการไฟล์ */
-        .list-group-item {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
+        /* Input Fields */
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
             border: none;
-            transition: all 0.3s ease-in-out;
+            color: white;
         }
 
-        .list-group-item:hover {
-            background: rgba(255, 255, 255, 0.25);
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .list-group-item a {
-            color: #f8d210;
-        }
-
-        .btn-sm {
-            font-size: 14px;
-            padding: 5px 10px;
+        /* Map */
+        .map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
         }
     </style>
 </head>
@@ -135,71 +134,57 @@
             </a>
             <div class="ms-auto d-flex">
                 <a href="{{ url_for('user_dashboard') }}" class="btn btn-light btn-custom me-2"><i class="fas fa-home"></i> หน้าหลัก</a>
-                <a href="{{ url_for('status') }}" class="btn btn-light btn-custom me-2"><i class="fas fa-chart-line"></i> สถานะ</a>
                 <a href="{{ url_for('logout') }}" class="btn btn-danger btn-custom"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
             </div>
         </div>
     </nav>
 
-    <!-- Profile Section -->
+    <!-- Contact Section -->
     <div class="container mt-5">
-        <div class="profile-container">
-            <h1 class="text-center"><i class="fas fa-user-circle"></i> โปรไฟล์ของคุณ</h1>
-            <p class="text-center"><i class="fas fa-user"></i> ชื่อผู้ใช้: <strong>{{ username }}</strong></p>
-            <p class="text-center"><i class="fas fa-user-tag"></i> บทบาท: <strong>{{ role }}</strong></p>
+        <div class="contact-container">
+            <h1 class="text-center"><i class="fas fa-envelope"></i> ติดต่อเรา</h1>
+            <p class="text-center">หากคุณมีคำถาม หรือ ต้องการติดต่อเรา สามารถใช้แบบฟอร์มหรือข้อมูลด้านล่าง</p>
 
             <hr>
 
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+            <!-- Contact Information -->
+            <h2><i class="fas fa-info-circle"></i> ข้อมูลติดต่อ</h2>
+            <p><i class="fas fa-phone"></i> โทรศัพท์: 065-345-5229</p>
+            <p><i class="fas fa-envelope"></i> อีเมล: atiwat.pr@ksu.ac.th</p>
+            <p><i class="fas fa-map-marker-alt"></i> ที่อยู่: มหาวิทยาลัยกาฬสินธุ์, ประเทศไทย</p>
 
-            <!-- Upload Files -->
-            <form action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data">
+            <!-- Google Map -->
+            <div class="map-container">
+                <iframe 
+                    width="100%" 
+                    height="300" 
+                    frameborder="0" 
+                    style="border:0" 
+                    allowfullscreen 
+                    src="https://www.google.com/maps/embed/v1/place?q=Kalasin+University&key=YOUR_GOOGLE_MAPS_API_KEY">
+                </iframe>
+            </div>
+
+            <hr>
+
+            <!-- Contact Form -->
+            <h2><i class="fas fa-edit"></i> แบบฟอร์มติดต่อ</h2>
+            <form method="POST" action="{{ url_for('contact') }}">
                 <div class="mb-3">
-                    <h5>ไฟล์ที่ 1</h5>
-                    <input type="file" name="file1" accept=".pdf, .doc, .docx" class="form-control">
+                    <label class="form-label">ชื่อของคุณ</label>
+                    <input type="text" class="form-control" name="name" placeholder="กรอกชื่อของคุณ" required>
                 </div>
                 <div class="mb-3">
-                    <h5>ไฟล์ที่ 2</h5>
-                    <input type="file" name="file2" accept=".pdf, .doc, .docx" class="form-control">
+                    <label class="form-label">อีเมล</label>
+                    <input type="email" class="form-control" name="email" placeholder="กรอกอีเมลของคุณ" required>
                 </div>
                 <div class="mb-3">
-                    <h5>ไฟล์ที่ 3</h5>
-                    <input type="file" name="file3" accept=".pdf, .doc, .docx" class="form-control">
+                    <label class="form-label">ข้อความ</label>
+                    <textarea class="form-control" name="message" rows="4" placeholder="กรอกข้อความของคุณ" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-success btn-custom">
-                    <i class="fas fa-upload"></i> Upload
-                </button>
+                <button type="submit" class="btn btn-success btn-custom"><i class="fas fa-paper-plane"></i> ส่งข้อความ</button>
             </form>
             
-            
-
-            <!-- Show Uploaded Files -->
-            <h2 class="mt-4"><i class="fas fa-folder"></i> ไฟล์ของคุณ</h2>
-            <ul class="list-group">
-    {% for file in files %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <!-- ✅ เปิดไฟล์ในแท็บใหม่ -->
-        <a href="{{ url_for('view_file', filename=file.filename) }}" target="_blank">
-            <i class="fas fa-file"></i> {{ file.filename }}
-        </a>
-        <!-- ✅ ปุ่มลบไฟล์ -->
-        <a href="{{ url_for('delete_file', file_id=file.id) }}" class="btn btn-danger btn-sm">
-            <i class="fas fa-trash"></i> ลบ
-        </a>
-    </li>
-    {% endfor %}
-</ul>
-
         </div>
     </div>
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,12 +15,15 @@
         </div>
         
         <h1>สมัครสมาชิก</h1>
-        <form method="POST" action="{{ url_for('register') }}">
+        <form method="POST" action="{{ url_for('register') }}" onsubmit="return validatePassword()">
             <label for="username">ชื่อผู้ใช้</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
             <label for="password">รหัสผ่าน</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <label for="confirm_password">ยืนยันรหัสผ่าน</label>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
 
             <!-- 🔹 ช่องเลือกประเภทบัญชี -->
             <label for="role">เลือกประเภทบัญชี:</label>
@@ -38,5 +41,20 @@
             <p>มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a></p>
         </div>
     </div>
+
+    <!-- แจ้งเตือนหากรหัสผ่านไม่ตรงกัน -->
+    <script>
+        function validatePassword() {
+            let password = document.getElementById("password").value;
+            let confirmPassword = document.getElementById("confirm_password").value;
+
+            if (password !== confirmPassword) {
+                alert("❌ รหัสผ่านไม่ตรงกัน! กรุณาลองอีกครั้ง");
+                return false;
+            }
+            return true;
+        }
+    </script>
+
 </body>
 </html>

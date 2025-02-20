@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>เข้าสู่ระบบคณะ</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" type="image/x-icon">
 </head>
@@ -14,31 +14,19 @@
             <img src="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" alt="Logo">
         </div>
         
-        <h1>Login</h1>
+        <h1>เข้าสู่ระบบคณะ</h1>
         <form method="POST">
-            <label for="username">Username</label>
+            <label for="username">ชื่อผู้ใช้</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required>
             
-            <label for="password">Password</label>
+            <label for="password">รหัสผ่าน</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
-            <!-- 🔹 เปลี่ยน Role เป็นปุ่ม Radio -->
-            <label>เข้าสู่ระบบเป็น:</label>
-            <div class="role-select">
-                <input type="radio" id="user" name="role" value="user" required>
-                <label for="user">User</label>
-
-                <input type="radio" id="admin" name="role" value="admin" required>
-                <label for="admin">Admin</label>
-            </div>
 
             <button type="submit">Login</button>
         </form>
 
         <div class="register-link">
-            <p>ยังไม่มีบัญชี? <a href="{{ url_for('register_user') }}">สมัครสมาชิก</a></p>
-
-
+            <p>ยังไม่มีบัญชี? <a href="{{ url_for('register_faculty') }}">สมัครสมาชิกคณะ</a></p>
         </div>
     </div>
 </body>

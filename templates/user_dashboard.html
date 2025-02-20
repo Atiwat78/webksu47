@@ -14,162 +14,115 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
-        /* ใช้ Font Poppins */
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(-45deg, #141e30, #243b55, #0f2027, #203a43);
-            background-size: 400% 400%;
-            animation: bg-animation 10s ease infinite;
-            color: white;
+            background: white;
+            color: black;
+            transition: all 0.3s ease-in-out;
         }
 
-        @keyframes bg-animation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* Navbar */
         .navbar {
-            background: rgba(0, 0, 0, 0.8);
+            background:  #000000;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .navbar a:hover {
-            transform: scale(1.05);
-        }
-
-        /* ปรับแต่ง Card */
         .card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.05);
+            color: black;
             border-radius: 12px;
             padding: 20px;
-            color: white;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.4);
-        }
-
-        /* ปุ่ม */
         .btn-custom {
-            font-size: 16px;
+            background: black;
+            color: white;
             font-weight: 600;
             padding: 12px 20px;
             border-radius: 10px;
             transition: all 0.3s ease-in-out;
         }
-
-        .btn-custom:hover {
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-
-        /* กล่องข้อความต้อนรับ */
-        .welcome-box {
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 25px;
-            text-align: center;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
-        }
-
-        /* Preloader */
-        #preloader {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: #141e30;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
-
-    <!-- Preloader -->
-    <div id="preloader">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand ms-2" href="{{ url_for('user_dashboard') }}">
-                <img src="https://upload.wikimedia.org/wikipedia/th/thumb/4/4e/Kalasin_University_Seal.svg/1200px-Kalasin_University_Seal.svg.png" 
-                    alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
+                <img src="https://upload.wikimedia.org/wikipedia/th/thumb/4/4e/Kalasin_University_Seal.svg/1200px-Kalasin_University_Seal.svg.png" alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
                 <strong>Kalasin University</strong>
             </a>
-
             <div class="ms-auto d-flex">
-                <a href="{{ url_for('user_dashboard') }}" class="btn btn-light btn-custom me-2">
-                    <i class="fas fa-home"></i> หน้าหลัก
+                <a href="{{ url_for('status') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
+                    <i class="fas fa-chart-line"></i> สถานะการดำเนินการ
                 </a>                
-                <a href="{{ url_for('status') }}" class="btn btn-light btn-custom me-2">
-                    <i class="fas fa-chart-line"></i> ตรวจสอบสถานะ
-                </a>
-                
-                
-                <a href="{{ url_for('logout') }}" class="btn btn-danger btn-custom"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container mt-5">
-        <div class="welcome-box">
-            <h1 class="text-center">ยินดีต้อนรับ, <strong>{{ username }}</strong></h1>
-            <p>ยินดีต้อนรับเข้าสู่ระบบของเรา! กรุณากรอกข้อมูลเพื่อดำเนินการต่อ</p>
-        </div>
+        <div class="card shadow-lg">
+            <div class="card-body text-center">
+                <h1 class="mb-4">ยินดีต้อนรับ, <strong>{{ username }}</strong></h1>
+                <p class="lead">
+                    เว็บไซต์ขอตำแหน่งทางวิชาการเป็นแพลตฟอร์มที่ออกแบบมาเพื่ออำนวยความสะดวกให้กับอาจารย์และบุคลากรทางการศึกษา
+                    ที่ต้องการยื่นขอตำแหน่งวิชาการ เช่น <strong>ผู้ช่วยศาสตราจารย์, รองศาสตราจารย์ และศาสตราจารย์</strong>
+                </p>
+                <hr class="my-4">
+                <div class="text-start">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">✅</span> <strong>ระบบสมัครออนไลน์</strong> – กรอกข้อมูลและอัปโหลดเอกสารที่เกี่ยวข้องได้โดยตรง
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">✅</span> <strong>ตรวจสอบสถานะการสมัคร</strong> – ติดตามความคืบหน้าพร้อมรับแจ้งเตือน
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">✅</span> <strong>คู่มือและแนวทางการขอ</strong> – เอกสารและคำแนะนำเกี่ยวกับขั้นตอนและหลักเกณฑ์
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">✅</span> <strong>ระบบจัดการเอกสาร</strong> – รองรับการอัปโหลดเอกสารสำคัญ เช่น งานวิจัย บทความวิชาการ
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">✅</span> <strong>ช่องทางติดต่อ</strong> – ระบบติดต่อสอบถามเจ้าหน้าที่หรือคณะกรรมการ
+                        </li>
+                    </ul>
+                </div>
+                
+    
 
-        <!-- เมนูการใช้งาน -->
-        <div class="row mt-4">
+    <div class="container mt-4">
+        <div class="row g-4"> <!-- เพิ่ม gutter (g-4) ให้มีระยะห่างระหว่างการ์ด -->
             <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
                         <h5 class="card-title"><i class="fas fa-user"></i> จัดการข้อมูลของฉัน</h5>
-                        <p class="card-text">แก้ไขข้อมูลส่วนตัว</p>
-                        <a href="{{ url_for('profile') }}" class="btn btn-primary btn-custom"><i class="fas fa-id-card"></i> ดูโปรไฟล์</a>
+                        <p class="card-text">แก้ไขข้อมูลเเละอัพโหลดเอกสาร</p>
+                        <a href="{{ url_for('profile') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                            <i class="fas fa-id-card"></i> ดูโปรไฟล์
+                        </a>
                     </div>
                 </div>
             </div>
-
             <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
                         <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
                         <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
-                        <a href="#" class="btn btn-warning btn-custom"><i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน</a>
+                        <a href="{{ url_for('change_password') }}" class="btn btn-warning fw-bold px-4 py-2 mt-auto">
+                            <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+                        </a>
                     </div>
                 </div>
             </div>
-
+            
             <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
                         <h5 class="card-title"><i class="fas fa-envelope"></i> ติดต่อเรา</h5>
                         <p class="card-text">ช่องทางติดต่อเพิ่มเติม</p>
-                        <a href="{{ url_for('contact') }}" class="btn btn-info btn-custom">
+                        <a href="{{ url_for('contact') }}" class="btn btn-info fw-bold px-4 py-2 mt-auto">
                             <i class="fas fa-comments"></i> ติดต่อเรา
                         </a>
                     </div>
@@ -178,10 +131,11 @@
         </div>
     </div>
 
-    <script>
-        window.onload = function () {
-            document.getElementById("preloader").style.display = "none";
-        };
-    </script>
+    
+
+
+
+    
+    
 </body>
 </html>

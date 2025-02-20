@@ -5,12 +5,18 @@ import os
 from flask import jsonify
 from flask import Flask, render_template, session, redirect, url_for
 from models import db, ContactMessage, User, File  # ✅ แก้เป็น ContactMessage
+import os
+print("Templates Path:", os.path.abspath("templates"))
+print("Files in templates:", os.listdir("templates"))
 
 
 
 # 🔹 ตั้งค่าแอป Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.urandom(24)
+
 
 # 🔹 ตั้งค่า SQLite Database
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -60,8 +66,11 @@ def allowed_file(filename):
 
 # 🔹 Route: หน้าแรก (เปิดมาให้ไปที่หน้า Login)
 @app.route('/')
-def index():
-    return redirect(url_for('login'))
+@app.route('/home')  # ✅ รองรับทั้ง "/" และ "/home"
+def home():
+    return render_template('home.html')
+
+
 
 # 🔹 Route: Login
 @app.route('/login', methods=['GET', 'POST'])
@@ -84,34 +93,35 @@ def login():
     return render_template('login.html')
 
 # 🔹 Route: Register
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/register_user', methods=['GET', 'POST'])
+def register_user():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
-        role = request.form['role']
+        role = "user"  # ✅ บังคับให้เป็น user
+        
+        faculty = request.form.get('faculty', '')  # ✅ ใช้ .get() เพื่อป้องกัน KeyError
 
-        # ✅ ตรวจสอบว่ารหัสผ่านตรงกัน
         if password != confirm_password:
             flash("❌ รหัสผ่านไม่ตรงกัน! กรุณาลองอีกครั้ง", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for('register_user'))
 
-        # ✅ ตรวจสอบว่ามีชื่อผู้ใช้อยู่แล้วหรือไม่
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash("❌ ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว", "danger")
-            return redirect(url_for('register'))
+            return redirect(url_for('register_user'))
 
-        # ✅ บันทึกผู้ใช้ใหม่ในฐานข้อมูล (ไม่มีการเข้ารหัส)
         new_user = User(username=username, password=password, role=role)
         db.session.add(new_user)
         db.session.commit()
 
         flash("✅ สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ", "success")
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  # ✅ เปลี่ยนเส้นทางไป login
 
-    return render_template('register.html')
+    return render_template('register_user.html')  # ✅ เปลี่ยนชื่อไฟล์ HTML
+
+
 
 # 🔹 Route: User Dashboard
 @app.route('/user_dashboard', methods=['GET', 'POST'])
@@ -129,14 +139,12 @@ def admin_dashboard():
     if 'user_id' not in session or session.get('role') != 'admin':
         return redirect(url_for('login'))
 
-    users = User.query.all()
-    files = File.query.all()
+    # ✅ ดึงข้อมูลของผู้ใช้ทั้งหมดและไฟล์ที่อัปโหลด
+    users = User.query.options(db.joinedload(User.files)).all()  
 
     return render_template('admin_dashboard.html', 
                            username=session['username'], 
-                           users=users, 
-                           files=files)  # ✅ ไม่มี unread_messages_count แล้ว
-
+                           users=users)  # ✅ ส่ง users ไปแสดงไฟล์ของแต่ละคน
 
 
 # 🔹 Route: Logout
@@ -175,6 +183,19 @@ def upload_profile():
     db.session.commit()
     flash("✅ อัปโหลดไฟล์สำเร็จ!", "success")
     return redirect(url_for('profile'))
+
+
+#    Route สำหรับดูไฟล์ของผู้ใช้แต่ละคน
+@app.route('/admin/user/<int:user_id>')
+def admin_user_files(user_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    user = User.query.get_or_404(user_id)
+    files = File.query.filter_by(user_id=user.id).all()
+
+    return render_template('admin_user_files.html', user=user, files=files)
+
 
 # 🔹 Route: Status Page
 @app.route('/status')
@@ -228,11 +249,27 @@ def view_file(filename):
 @app.route('/admin/messages')
 def admin_messages():
     if 'user_id' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  
 
-    messages = ContactMessage.query.all()  # ✅ ใช้ ContactMessage
+    # ✅ ดึงข้อความจาก ContactMessage (แก้ไขจาก Message)
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    
     return render_template('admin_messages.html', messages=messages)
 
+
+#ลบข้อความที่ userส่งมา
+@app.route('/delete_message/<int:message_id>', methods=['POST'])
+def delete_message(message_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))  # ตรวจสอบว่าเป็น Admin หรือไม่
+
+    message = ContactMessage.query.get(message_id)
+    if message:
+        db.session.delete(message)
+        db.session.commit()
+        flash("✅ ลบข้อความสำเร็จ!", "success")
+
+    return redirect(url_for('admin_messages'))
 
 
 # ลบหน้าในส่วนเเอดมิน
@@ -263,6 +300,146 @@ def delete_file(file_id):
         flash("✅ ลบไฟล์สำเร็จ!", "success")
 
     return redirect(url_for('profile'))
+
+
+#หน้าอัพเดทรหัสผ่าน 
+# 🔹 Route: เปลี่ยนรหัสผ่าน (ไม่ใช้ Hash)
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+
+    if request.method == 'POST':
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        # ✅ ตรวจสอบว่ารหัสผ่านเก่าถูกต้อง
+        if user.password != old_password:
+            flash("❌ รหัสผ่านเดิมไม่ถูกต้อง!", "danger")
+            return redirect(url_for('change_password'))
+
+        # ✅ ตรวจสอบว่ารหัสผ่านใหม่ตรงกัน
+        if new_password != confirm_password:
+            flash("❌ รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน!", "danger")
+            return redirect(url_for('change_password'))
+
+        # ✅ อัปเดตรหัสผ่านใหม่ (ไม่มีการเข้ารหัส)
+        user.password = new_password
+        db.session.commit()
+
+        flash("✅ เปลี่ยนรหัสผ่านสำเร็จ!", "success")
+        return redirect(url_for('user_dashboard'))
+
+    return render_template('change_password.html')
+
+
+
+#เเสดงข้อมูลคณะ
+@app.route('/faculties')
+def faculties():
+    faculty_list = [
+        {"name": "คณะวิศวกรรมศาสตร์", "description": "มุ่งเน้นการเรียนการสอนด้านวิศวกรรมทุกสาขา"},
+        {"name": "คณะวิทยาศาสตร์", "description": "เน้นการศึกษาวิจัยด้านวิทยาศาสตร์และเทคโนโลยี"},
+        {"name": "คณะมนุษยศาสตร์", "description": "ศึกษาด้านศิลปศาสตร์และสังคมศาสตร์"},
+        {"name": "คณะบริหารธุรกิจ", "description": "มุ่งเน้นการจัดการธุรกิจ การเงิน และการตลาด"},
+    ]
+    
+    return render_template('faculty.html', faculties=faculty_list)
+
+#สมัครสมาชิกคณะ
+@app.route('/register_faculty', methods=['GET', 'POST'])
+def register_faculty():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        faculty = request.form.get('faculty')  # ✅ ใช้ .get() เพื่อป้องกัน KeyError
+
+        # ตรวจสอบว่ามีคณะถูกเลือกหรือไม่
+        if not faculty:
+            flash("❌ กรุณาเลือกคณะ!", "danger")
+            return redirect(url_for('register_faculty'))
+
+        # ตรวจสอบว่ารหัสผ่านตรงกัน
+        if password != confirm_password:
+            flash("❌ รหัสผ่านไม่ตรงกัน!", "danger")
+            return redirect(url_for('register_faculty'))
+
+        # ตรวจสอบว่าผู้ใช้ซ้ำหรือไม่
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash("❌ ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว!", "danger")
+            return redirect(url_for('register_faculty'))
+
+        # บันทึกลงฐานข้อมูล
+        new_user = User(username=username, password=password, role="faculty")
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("✅ สมัครสมาชิกคณะสำเร็จ! กรุณาเข้าสู่ระบบ", "success")
+        return redirect(url_for('login_faculty'))
+
+    return render_template('register_faculty.html')
+
+
+
+#เข้าสุ่ระบบคณะ
+@app.route('/login_faculty', methods=['GET', 'POST'])
+def login_faculty():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        # ตรวจสอบข้อมูลผู้ใช้คณะ (ในฐานข้อมูล)
+        faculty_user = User.query.filter_by(username=username, role='faculty').first()
+        if faculty_user and faculty_user.password == password:
+            session['user_id'] = faculty_user.id
+            session['username'] = faculty_user.username
+            session['role'] = faculty_user.role
+            return redirect(url_for('faculty_dashboard'))  # ไปยังหน้า dashboard คณะ
+        
+        flash("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!", "danger")
+    
+    return render_template('faculty_login.html')
+
+#หน้าหลักคณะ
+# 🔹 Route: Faculty Dashboard
+@app.route('/faculty_dashboard')
+def faculty_dashboard():
+    if 'user_id' not in session or session.get('role') != 'faculty':
+        return redirect(url_for('login_faculty'))  # ถ้าไม่ได้เข้าสู่ระบบให้กลับไปหน้า login
+
+    return render_template('faculty_dashboard.html', username=session['username'])
+
+# ดึงข้อมุลจากไฟล์ยูสเซอร์เเละอ่านไฟล์
+def read_user_requests():
+    data = []
+    try:
+        with open("user_requests.csv", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                data.append(row)
+    except FileNotFoundError:
+        data = []
+    return data
+
+# ✅ Route สำหรับหน้า "จัดการและอนุมัติคำขอ"
+@app.route('/manage_requests')
+def manage_requests():
+    requests_data = read_user_requests()  # ✅ เรียกใช้ฟังก์ชันที่ถูกต้อง
+    return render_template('manage_requests.html', requests=requests_data)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+
+
+
+
+
 
 
 

@@ -15,7 +15,8 @@
         </div>
         
         <h1>สมัครสมาชิก</h1>
-        <form method="POST" action="{{ url_for('register') }}" onsubmit="return validatePassword()">
+        <form method="POST" action="{{ url_for('register_user') }}" onsubmit="return validatePassword()">
+
             <label for="username">ชื่อผู้ใช้</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required>
 

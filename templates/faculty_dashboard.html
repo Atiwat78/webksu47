@@ -63,6 +63,7 @@
     <div class="container mt-5">
         <div class="card shadow-lg">
             <div class="card-body text-center">
+                <img src="static/images/kon.gif" alt="Document Management" class="img-fluid mb-3" style="width: 100px; height: 100px;">
                 <h1 class="mb-4">ยินดีต้อนรับ, <strong>{{ username }}</strong></h1>
                 <p class="lead">
                     แดชบอร์ดของคณะ ให้คุณสามารถจัดการและติดตามข้อมูลการขอตำแหน่งทางวิชาการได้อย่างสะดวก
@@ -90,7 +91,7 @@
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
                         <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
-                        <a href="{{ url_for('change_password') }}" class="btn btn-warning fw-bold px-4 py-2">
+                        <a href="{{ url_for('change_password_faculty') }}" class="btn btn-warning fw-bold px-4 py-2">
                             <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
                         </a>
                     </div>

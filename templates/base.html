@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ระบบจัดการข้อมูล{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>ระบบจัดการข้อมูล</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">🏠 หน้าหลัก</a>
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('logout') }}">🚪 ออกจากระบบ</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">🔑 เข้าสู่ระบบ</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>© 2025 ระบบจัดการข้อมูล</p>
+    </footer>
+
+</body>
+</html>

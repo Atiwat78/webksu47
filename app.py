@@ -234,15 +234,20 @@ def register_faculty():
 @app.route('/faculty_dashboard')
 def faculty_dashboard():
     if 'user_id' not in session or session.get('role') != 'faculty':
-        return redirect(url_for('faculty_login'))  # ถ้าไม่มี Session ให้กลับไปหน้า Login ของคณะ
-
-    # ป้องกันการย้อนกลับไปหน้า Dashboard หลัง Logout
-    response = make_response(render_template('faculty_dashboard.html', username=session['username']))
+        return redirect(url_for('faculty_login'))
+    
+    faculty_user = User.query.get(session['user_id'])
+    response = make_response(render_template(
+        'faculty_dashboard.html',
+        username=session['username'],
+        faculty=faculty_user.faculty  # ส่งข้อมูลคณะไปยังเทมเพลต
+    ))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     
     return response
+
 
 
 # ✅ Route: Faculties Page (หน้าแสดงข้อมูลคณะ)

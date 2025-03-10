@@ -447,6 +447,18 @@ def admin_dashboard():
 
 
 
+@app.route('/help')
+def help():
+    return render_template('help.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+
+
+
+
 
 
 # ✅ Route: Logout

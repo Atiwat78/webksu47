@@ -43,6 +43,57 @@
             border-radius: 10px;
             transition: all 0.3s ease-in-out;
         }
+        #chat-box {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1050;
+        }
+        .chat-header {
+            background-color: #1877F2;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .chat-footer {
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+        #chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1877F2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 1050;
+        }
+        .card-img-top {
+            height: 200px; /* กำหนดความสูงของรูปภาพให้เท่ากัน */
+            object-fit: cover; /* ปรับขนาดภาพให้เต็มกรอบ โดยไม่เสียสัดส่วน */
+        }
+        
     </style>
 </head>
 <body>
@@ -92,44 +143,126 @@
                 
     
 
-    <div class="container mt-4">
-        <div class="row g-4"> <!-- เพิ่ม gutter (g-4) ให้มีระยะห่างระหว่างการ์ด -->
-            <div class="col-md-4">
-                <div class="card text-center h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title"><i class="fas fa-user"></i> จัดการข้อมูลของฉัน</h5>
-                        <p class="card-text">แก้ไขข้อมูลเเละอัพโหลดเอกสาร</p>
-                        <a href="{{ url_for('profile') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
-                            <i class="fas fa-id-card"></i> ดูโปรไฟล์
-                        </a>
+                <div class="container mt-4">
+                    <div class="row g-4"> <!-- เพิ่ม gutter (g-4) ให้มีระยะห่างระหว่างการ์ด -->
+                        
+                        <!-- การ์ด 1 -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/ben-sweet-2LowviVHZ-E-unsplash.jpg" class="card-img-top" alt="Profile Image">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-user"></i> จัดการข้อมูลของฉัน</h5>
+                                    <p class="card-text">แก้ไขข้อมูลเเละอัพโหลดเอกสาร</p>
+                                    <a href="{{ url_for('profile') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-id-card"></i> ดูโปรไฟล์
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- การ์ด 2 -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/rc-xyz-nft-gallery--o90yRQoXAM-unsplash.jpg" class="card-img-top" alt="Change Password">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
+                                    <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
+                                    <a href="{{ url_for('change_password') }}" class="btn btn-warning fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- การ์ด 3 -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/contact.jpg" class="card-img-top" alt="Contact Us">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-envelope"></i> ติดต่อเรา</h5>
+                                    <p class="card-text">ช่องทางติดต่อเพิ่มเติม</p>
+                                    <a href="{{ url_for('contact') }}" class="btn btn-info fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-comments"></i> ติดต่อเรา
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- การ์ด 4 -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/help.jpg" class="card-img-top" alt="Help">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-question-circle"></i> ศูนย์ช่วยเหลือ</h5>
+                                    <p class="card-text">แหล่งข้อมูลและคำถามที่พบบ่อย</p>
+                                    <a href="{{ url_for('help') }}" class="btn btn-success fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-info-circle"></i> เข้าสู่ศูนย์ช่วยเหลือ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- การ์ด 5 -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/settings.jpg" class="card-img-top" alt="Settings">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-cog"></i> ตั้งค่าระบบ</h5>
+                                    <p class="card-text">ปรับแต่งการใช้งานระบบตามต้องการ</p>
+                                    <a href="{{ url_for('settings') }}" class="btn btn-dark fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-tools"></i> ตั้งค่าระบบ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- การ์ด 6 -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/logout.jpg" class="card-img-top" alt="Logout">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</h5>
+                                    <p class="card-text">ออกจากระบบเพื่อความปลอดภัย</p>
+                                    <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-power-off"></i> ออกจากระบบ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
-                        <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
-                        <a href="{{ url_for('change_password') }}" class="btn btn-warning fw-bold px-4 py-2 mt-auto">
-                            <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card text-center h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                        <h5 class="card-title"><i class="fas fa-envelope"></i> ติดต่อเรา</h5>
-                        <p class="card-text">ช่องทางติดต่อเพิ่มเติม</p>
-                        <a href="{{ url_for('contact') }}" class="btn btn-info fw-bold px-4 py-2 mt-auto">
-                            <i class="fas fa-comments"></i> ติดต่อเรา
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+                
+
+     <!-- Chat Button -->
+<button id="chat-btn" onclick="toggleChat()">
+    <i class="fas fa-comments"></i>
+</button>
+
+<!-- Chat Box -->
+<div id="chat-box">
+    <div class="chat-header">
+        เเชทกับคณะ
+        <button type="button" class="btn-close btn-close-white float-end" onclick="toggleChat()"></button>
     </div>
+    <div class="chat-body">
+        <p>Welcome! How can we help you?</p>
+    </div>
+    <div class="chat-footer">
+        <input type="text" class="form-control" placeholder="Type your message...">
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox.style.display === 'none' || chatBox.style.display === '') {
+            chatBox.style.display = 'flex';
+        } else {
+            chatBox.style.display = 'none';
+        }
+    }
+</script>
 
     
 

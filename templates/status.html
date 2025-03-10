@@ -78,23 +78,33 @@
 
                 <hr>
 
-                <h3 class="mb-3">📌 รายการสถานะปัจจุบัน</h3>
+                <h3 class="mb-3">📌 รายการสถานะเอกสาร</h3>
                 <ul class="list-group">
-                    <li class="list-group-item list-group-item-warning">
-                        <i class="fas fa-hourglass-half"></i> กำลังตรวจสอบเอกสาร
-                    </li>
-                    <li class="list-group-item list-group-item-success">
-                        <i class="fas fa-check-circle"></i> อนุมัติเอกสารเบื้องต้น
-                    </li>
-                    <li class="list-group-item list-group-item-info">
-                        <i class="fas fa-clock"></i> รอการพิจารณาจากคณะกรรมการ
-                    </li>
+                    {% for file in files %}
+                        <li class="list-group-item {% if file.status == 'อนุมัติแล้ว' %}list-group-item-success{% else %}list-group-item-warning{% endif %}">
+                            {% if file.status == 'อนุมัติแล้ว' %}
+                                <i class="fas fa-check-circle"></i> {{ file.filename }} - อนุมัติแล้ว
+                            {% else %}
+                                <i class="fas fa-hourglass-half"></i> {{ file.filename }} - รอการอนุมัติ
+                            {% endif %}
+                        </li>
+                    {% else %}
+                        <li class="list-group-item list-group-item-info">
+                            <i class="fas fa-file"></i> ยังไม่มีเอกสารที่ส่งคำขอ
+                        </li>
+                    {% endfor %}
                 </ul>
 
                 <div class="mt-4">
                     <h5>ความคืบหน้าการดำเนินการ</h5>
+                    {% set total_files = files|length %}
+                    {% set approved_files = files|selectattr('status', 'equalto', 'อนุมัติแล้ว')|list|length %}
+                    {% set percentage = (approved_files / total_files * 100) if total_files > 0 else 0 %}
+                    
                     <div class="progress">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 50%; font-size: 18px;">50% เสร็จสิ้น</div>
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ percentage }}%; font-size: 18px;">
+                            {{ percentage | round(0) }}% เสร็จสิ้น
+                        </div>
                     </div>
                 </div>
 

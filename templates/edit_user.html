@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แก้ไขข้อมูลผู้ใช้</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: white;
+            color: black;
+        }
+        .container-custom {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand ms-2" href="{{ url_for('user_dashboard') }}">
+                <strong>Kalasin University</strong>
+            </a>
+            <div class="ms-auto d-flex">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container container-custom mt-5">
+        <h2>🔧 แก้ไขข้อมูลผู้ใช้</h2>
+        <form method="POST" action="{{ url_for('edit_user', user_id=user.id) }}">
+            <div class="mb-3">
+                <label for="username" class="form-label">ชื่อผู้ใช้</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">อีเมล</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">รหัสผ่านใหม่</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน">
+            </div>
+            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> บันทึกการเปลี่ยนแปลง</button>
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">ยกเลิก</a>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

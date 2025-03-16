@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อมูลผู้ใช้</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: white;
+            color: black;
+        }
+        .navbar {
+            background: #000000;
+            backdrop-filter: blur(10px);
+        }
+        .container-custom {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+        .file-card {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
+        }
+        .file-card:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .status-approved {
+            color: green;
+            font-weight: bold;
+        }
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+        .comment-box {
+            min-height: 80px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            resize: vertical;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- ✅ Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand ms-2" href="{{ url_for('admin_dashboard') }}">
+                <img src="https://upload.wikimedia.org/wikipedia/th/4/4e/Kalasin_University_Seal.svg" 
+                     alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
+                <strong>Kalasin University - Admin</strong>
+            </a>
+            <div class="ms-auto d-flex">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
+                    <i class="fas fa-home"></i> หน้าหลักแอดมิน
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container container-custom mt-5">
+        <h2>📄 ข้อมูลผู้ใช้</h2>
+        <div class="card p-4">
+            <h4><i class="fas fa-user"></i> {{ user.username }}</h4>
+            <p><i class="fas fa-envelope"></i> อีเมล: {{ user.email }}</p>
+            <p><i class="fas fa-circle" style="color: {% if user.status == 'active' %}green{% else %}red{% endif %};"></i> สถานะ: {{ user.status }}</p>
+        </div>
+
+        <h3 class="mt-4">📂 ไฟล์ที่อัปโหลด</h3>
+
+        {% if files %}
+        {% for file in files %}
+        <div class="file-card">
+            <p><i class="fas fa-file"></i> <strong>{{ file.filename }}</strong></p>
+            <p>📌 สถานะ: 
+                <span class="{% if file.status == 'อนุมัติแล้ว' %}status-approved{% else %}status-pending{% endif %}">
+                    {{ file.status }}
+                </span>
+            </p>
+            <!-- เพิ่มช่องสำหรับให้แอดมินพิมพ์เหตุผล -->
+            <textarea class="form-control mt-2" id="comment-{{ file.id }}" placeholder="เพิ่มหมายเหตุ (ถ้ามี)">{{ file.comment if file.comment else '' }}</textarea>
+            
+            <div class="d-flex mt-2">
+                <a href="{{ url_for('uploaded_file', filename=file.filename) }}" class="btn btn-success btn-sm me-2" target="_blank">
+                    <i class="fas fa-eye"></i> ดูไฟล์
+                </a>
+                <button class="btn btn-warning btn-sm me-2" onclick="approveFile({{ file.id }})" id="approve-btn-{{ file.id }}">
+                    <i class="fas fa-check-circle"></i> อนุมัติ
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="saveComment({{ file.id }})">
+                    <i class="fas fa-save"></i> บันทึกหมายเหตุ
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">⛔ ผู้ใช้นี้ยังไม่มีการอัปโหลดไฟล์</p>
+    {% endif %}
+    
+    </div>
+
+    <script>
+        function approveFile(fileId) {
+            if (confirm("✅ คุณต้องการอนุมัติไฟล์นี้หรือไม่?")) {
+                fetch(`/approve_file/${fileId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert(data.message);
+                        document.getElementById(`status-${fileId}`).innerHTML = `<span class="status-approved">อนุมัติแล้ว</span>`;
+                        document.getElementById(`approve-btn-${fileId}`).remove();  // ซ่อนปุ่มเมื่ออนุมัติแล้ว
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function saveComment(fileId) {
+            const comment = document.getElementById(`comment-${fileId}`).value;
+            
+            fetch(`/save_comment/${fileId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ comment: comment })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('บันทึกหมายเหตุเรียบร้อย');
+                } else {
+                    alert('เกิดข้อผิดพลาดในการบันทึก');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+    </script>
+
+</body>
+</html>

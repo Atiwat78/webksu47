@@ -20,26 +20,22 @@
             <label for="username">ชื่อผู้ใช้</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
+            <label for="email">อีเมลล์</label>
+            <input type="email" id="email" name="email" placeholder="email" required>
+
+
             <label for="password">รหัสผ่าน</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
             <label for="confirm_password">ยืนยันรหัสผ่าน</label>
             <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
 
-            <!-- 🔹 ช่องเลือกประเภทบัญชี -->
-            <label for="role">เลือกประเภทบัญชี:</label>
-            <div class="role-select">
-                <select id="role" name="role" required>
-                    <option value="user" selected>ผู้ใช้ทั่วไป</option>
-                    <option value="admin">ผู้ดูแลระบบ</option>
-                </select>
-            </div>
 
             <button type="submit">สมัครสมาชิก</button>
         </form>
 
         <div class="register-link">
-            <p>มีบัญชีอยู่แล้ว? <a href="{{ url_for('faculty_login') }}">เข้าสู่ระบบคณะ</a></p>
+            <p>มีบัญชีอยู่แล้ว? <a href="{{ url_for('login') }}">เข้าสู่ระบบมหาวิทยาลัย</a></p>
         </div>
     </div>
 
@@ -48,14 +44,25 @@
         function validatePassword() {
             let password = document.getElementById("password").value;
             let confirmPassword = document.getElementById("confirm_password").value;
-
+            let email = document.getElementById("email").value;
+            let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+            // ตรวจสอบอีเมล
+            if (!emailPattern.test(email)) {
+                alert("❌ กรุณากรอกอีเมลให้ถูกต้อง!");
+                return false;
+            }
+    
+            // ตรวจสอบรหัสผ่าน
             if (password !== confirmPassword) {
                 alert("❌ รหัสผ่านไม่ตรงกัน! กรุณาลองอีกครั้ง");
                 return false;
             }
+            
             return true;
         }
     </script>
+    
 
 </body>
 </html>

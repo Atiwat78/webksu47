@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แผงควบคุมผู้ดูแลระบบ</title>
+    <title>แอดมิน - ระบบจัดการ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" type="image/x-icon">
     
     <!-- Google Font - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
@@ -22,11 +20,11 @@
         }
 
         .navbar {
-            background: black;
+            background: #000000;
             backdrop-filter: blur(10px);
         }
 
-        .card-custom {
+        .card {
             background: rgba(0, 0, 0, 0.05);
             color: black;
             border-radius: 12px;
@@ -34,52 +32,196 @@
             border: 2px solid rgba(0, 0, 0, 0.2);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
+
+        .btn-custom {
+            background: black;
+            color: white;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .card-img-top {
+            height: 200px; /* ปรับขนาดรูปภาพในการ์ด */
+            object-fit: cover;
+        }
+
+        /* Chat Box */
+        #chat-box {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1050;
+        }
+
+        .chat-header {
+            background-color: #1877F2;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .chat-footer {
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        #chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1877F2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 1050;
+        }
+        .admin-logo {
+            width: 120px;  /* กำหนดความกว้าง */
+            height: auto;  /* ปรับขนาดอัตโนมัติ */
+            margin-bottom: 10px; /* เพิ่มระยะห่างจากข้อความ */
+        }
+        
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand ms-2" href="{{ url_for('admin_dashboard') }}">
-                <img src="https://upload.wikimedia.org/wikipedia/th/thumb/4/4e/Kalasin_University_Seal.svg/1200px-Kalasin_University_Seal.svg.png" 
-                    alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
-                <strong>Kalasin University</strong>
+                <img src="https://upload.wikimedia.org/wikipedia/th/4/4e/Kalasin_University_Seal.svg" alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
+                <strong>Kalasin University - Admin</strong>
             </a>
             <div class="ms-auto d-flex">
-                <a href="{{ url_for('admin_messages') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
-                    <i class="fas fa-envelope"></i> ข้อความจากผู้ใช้
+                <a href="{{ url_for('manage_users') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
+                    <i class="fas fa-users-cog"></i> จัดการผู้ใช้
                 </a>                
-                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
-                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
             </div>
         </div>
     </nav>
 
     <div class="container mt-5">
-        <h1 class="text-center">ยินดีต้อนรับ, <strong>{{ username }}</strong> (Admin)</h1>
-        <p class="text-center">จัดการไฟล์ของผู้ใช้</p>
+        <div class="card shadow-lg">
+            <div class="card-body text-center">
+                
+                <!-- โลโก้แอดมินด้านบน -->
+                <img src="{{ url_for('static', filename='images/dsdsdsad.gif') }}" 
+     alt="Admin Logo" 
+     class="admin-logo">
 
-        <div class="row">
-            {% for user in users %}
-            <div class="col-md-4">
-                <div class="card card-custom text-center">
-                    <div class="card-body">
-                        <i class="fas fa-user-circle fa-3x mb-3"></i>
-                        <h5 class="card-title">{{ user.username }}</h5>
-                        <p class="card-text">สถานะ: <strong>{{ user.role }}</strong></p>
-                        <a href="{{ url_for('admin_user_files', user_id=user.id) }}" class="btn btn-dark">
-                            <i class="fas fa-folder-open"></i> ดูไฟล์ของผู้ใช้
-                        </a>
-                        <a href="{{ url_for('delete_user', user_id=user.id) }}" 
-                           class="btn btn-danger mt-2" 
-                           onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบ {{ user.username }}?');">
-                            <i class="fas fa-trash"></i> ลบ
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
+    
+                <h1 class="mb-4">ยินดีต้อนรับผู้ดูแล <strong>{{ admin_name }}</strong></h1>
+                
+                <p class="lead">
+                    แดชบอร์ดสำหรับแอดมินเพื่อจัดการระบบ ดูแลผู้ใช้ และตรวจสอบการทำงานของระบบ
+                </p>
+                <hr class="my-4">
+                
+                <div class="container mt-4">
+                    <div class="row g-4">
+    
+                        <!-- การ์ด จัดการผู้ใช้ -->
+<div class="col-md-4">
+    <div class="card text-center h-100 shadow-sm">
+        <img src="static/images/system-solid-14-article-hover-article (1).gif"
+     class="card-img-top"
+     alt="Manage Users"
+     style="height: 120px; object-fit: contain; padding: 10px;">
+
+        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+            <h5 class="card-title"><i class="fas fa-users"></i> จัดการผู้ใช้</h5>
+            <p class="card-text">
+                ดูและจัดการบัญชีผู้ใช้ทั้งหมด</p>
+            <a href="{{ url_for('manage_users') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                <i class="fas fa-user-cog"></i> จัดการผู้ใช้
+            </a>
         </div>
     </div>
+</div>
+
+
+                        <!-- การ์ด ตั้งค่าระบบ -->
+<div class="col-md-4">
+    <div class="card text-center h-100 shadow-sm">
+        <img src="static/images/HTTSDS.gif"
+             class="card-img-top"
+             alt="Settings"
+             style="height: 120px; object-fit: contain; padding: 10px;">
+        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+            <h5 class="card-title"><i class="fas fa-cogs"></i> ตั้งค่าระบบ</h5>
+            <p class="card-text">กำหนดค่าระบบและการตั้งค่าต่างๆ</p>
+            <a href="{{ url_for('settings') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                <i class="fas fa-tools"></i> ตั้งค่า
+            </a>
+        </div>
+    </div>
+</div>
+
+
+                        <!-- การ์ด รายงาน -->
+                        <div class="col-md-4">
+                            <div class="card text-center h-100 shadow-sm">
+                                <img src="static/images/GTDSD.gif"
+                                class="card-img-top"
+             alt="Settings"
+             style="height: 120px; object-fit: contain; padding: 10px;">
+                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                    <h5 class="card-title"><i class="fas fa-chart-line"></i> รายงาน</h5>
+                                    <p class="card-text">ดูสถิติและรายงานการใช้งาน</p>
+                                    <a href="{{ url_for('reports') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-chart-bar"></i> ดูรายงาน
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Box -->
+    <button id="chat-btn" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+    </button>
+    <div id="chat-box">
+        <div class="chat-header">💬 แชทแอดมิน</div>
+        <div class="chat-body">...</div>
+        <div class="chat-footer">
+            <input type="text" class="form-control" placeholder="พิมพ์ข้อความ...">
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            document.getElementById('chat-box').style.display = 
+                document.getElementById('chat-box').style.display === 'none' ? 'flex' : 'none';
+        }
+    </script>
+
 </body>
 </html>

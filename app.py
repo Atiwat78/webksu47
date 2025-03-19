@@ -41,10 +41,12 @@ class ContactMessage(db.Model):
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(200), nullable=False)
-    file_path = db.Column(db.String(500), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(255), nullable=True)  # ✅ เพิ่มฟิลด์นี้
+    status = db.Column(db.String(50), nullable=False, default="รอตรวจสอบ")
+    comment = db.Column(db.Text, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    status = db.Column(db.String(50), default="รออนุมัติ")  # ✅ เพิ่มสถานะไฟล์
+
 
 # ✅ สร้างฐานข้อมูลถ้ายังไม่มี
 with app.app_context():
@@ -176,13 +178,17 @@ def delete_file(file_id):
 
     file = File.query.get(file_id)
     if file and (session.get('role') == 'admin' or file.user_id == session['user_id']):
-        os.remove(file.file_path)  
+        # ✅ ใช้ path จาก UPLOAD_FOLDER
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        
+        if os.path.exists(file_path):  # ✅ ตรวจสอบว่าไฟล์มีอยู่ก่อนลบ
+            os.remove(file_path)
+
         db.session.delete(file)    
         db.session.commit()
         flash("✅ ลบไฟล์สำเร็จ!", "success")
 
     return redirect(url_for('profile'))
-
 
 
 
@@ -238,8 +244,13 @@ def status():
 
     user = User.query.get(session['user_id'])
     files = File.query.filter_by(user_id=user.id).all()
-    
+
+    # ✅ Debug: ตรวจสอบว่ามีค่าหมายเหตุหรือไม่
+    for file in files:
+        print(f"ไฟล์: {file.filename}, สถานะ: {file.status}, หมายเหตุ: {file.comment}")
+
     return render_template('status.html', username=user.username, files=files)
+
 
 
 
@@ -299,11 +310,11 @@ def contact():
 
     return render_template('contact.html')
 
-
+# ✅ Route สำหรับอนุมัติไฟล์
 @app.route('/approve_file/<int:file_id>', methods=['POST'])
 def approve_file(file_id):
-    # ✅ ตรวจสอบว่าเป็นแอดมิน
-    if not session.get('admin'):  # ✅ ใช้ session['admin'] แทน role
+    # ✅ ตรวจสอบสิทธิ์แอดมิน
+    if not session.get('admin'):
         return jsonify({"status": "error", "message": "❌ คุณไม่มีสิทธิ์อนุมัติไฟล์นี้"}), 403
 
     file = File.query.get(file_id)
@@ -314,14 +325,58 @@ def approve_file(file_id):
     file.status = "อนุมัติแล้ว"
     db.session.commit()
 
-    return jsonify({"status": "success", "message": f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติแล้ว", "file_id": file_id, "new_status": file.status})
+    return jsonify({
+        "status": "success",
+        "message": f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติแล้ว",
+        "file_id": file_id,
+        "new_status": file.status
+    })
 
 
-#เช็คสถานะเเอดมิน
-@app.route('/check_session')
-def check_session():
-    return jsonify({"user_id": session.get('user_id'), "role": session.get('role')})
+# ✅ Route สำหรับไม่อนุมัติไฟล์ (พร้อมหมายเหตุ)
+@app.route('/reject_file/<int:file_id>', methods=['POST'])
+def reject_file(file_id):
+    # ✅ ตรวจสอบสิทธิ์แอดมิน
+    if not session.get('admin'):
+        return jsonify({"status": "error", "message": "❌ คุณไม่มีสิทธิ์ไม่อนุมัติไฟล์นี้"}), 403
 
+    data = request.json
+    comment = data.get("comment", "").strip()
+
+    if not comment:
+        return jsonify({"status": "error", "message": "⚠️ กรุณาใส่หมายเหตุสำหรับการไม่อนุมัติ"}), 400
+
+    file = File.query.get(file_id)
+    if not file:
+        return jsonify({"status": "error", "message": "❌ ไม่พบไฟล์"}), 404
+
+    # ✅ อัปเดตสถานะและหมายเหตุ
+    file.status = "ไม่อนุมัติ"
+    file.comment = comment
+    db.session.commit()
+
+    return jsonify({
+        "status": "success",
+        "message": f"❌ ไฟล์ {file.filename} ถูกไม่อนุมัติ",
+        "file_id": file_id,
+        "new_status": file.status,
+        "comment": file.comment
+    })
+
+
+# ✅ Route สำหรับบันทึกหมายเหตุ (ในกรณีที่ต้องการแยกฟังก์ชัน)
+@app.route('/save_comment/<int:file_id>', methods=['POST'])
+def save_comment(file_id):
+    data = request.json
+    comment = data.get('comment', '')
+
+    file = File.query.get(file_id)
+    if file:
+        file.comment = comment
+        db.session.commit()
+        return jsonify({'success': True, 'message': "📌 หมายเหตุถูกบันทึกแล้ว"})
+    
+    return jsonify({'success': False, 'message': "❌ ไม่พบไฟล์"}), 404
 
 
 
@@ -488,16 +543,15 @@ def reports():
     approved_files = File.query.filter_by(status="อนุมัติแล้ว").count()  # จำนวนไฟล์ที่อนุมัติ
     pending_files = File.query.filter_by(status="รออนุมัติ").count()  # จำนวนไฟล์ที่รออนุมัติ
 
-    # ✅ ดึงตำแหน่งทางวิชาการของผู้ใช้
-    faculty_stats = db.session.query(User.faculty, db.func.count(User.faculty)).group_by(User.faculty).all()
+
 
     # ✅ ส่งข้อมูลไปยัง reports.html
     return render_template('reports.html', 
                            total_users=total_users, 
                            total_files=total_files, 
                            approved_files=approved_files, 
-                           pending_files=pending_files, 
-                           faculty_stats=faculty_stats)
+                           pending_files=pending_files, )
+                           
 
 
 
@@ -513,17 +567,17 @@ def reports():
 
 @app.route('/logout')
 def logout():
-    user_role = session.get('role')  # ดึงบทบาทผู้ใช้จาก session
-    session.clear()  # เคลียร์ session ทั้งหมด
+    user_role = session.get('role')
+    session.clear()  # ล้าง session
 
-    flash("ออกจากระบบเรียบร้อย!", "success")
-
-    # ถ้าเป็นแอดมินให้ไปที่หน้า login ของแอดมิน
-    if user_role == 'admin_dashboard':
-        return redirect(url_for('admin_login'))
+    response = make_response(redirect(url_for('login') if user_role != 'admin' else url_for('admin_login')))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
     
-    # ถ้าเป็น user ปกติให้ไปที่หน้า login ของ user
-    return redirect(url_for('login'))
+    flash("ออกจากระบบเรียบร้อย!", "success")
+    return response
+
 
 
 

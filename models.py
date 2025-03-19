@@ -10,6 +10,12 @@ class User(db.Model):
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(255), nullable=True)  # ✅ เพิ่มฟิลด์นี้
+    status = db.Column(db.String(50), nullable=False, default="รอตรวจสอบ")
+    comment = db.Column(db.Text, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
 
 
 class ContactMessage(db.Model):

@@ -79,7 +79,7 @@
                                         </span>
                                     </p>
                                     <p><strong>หมายเหตุจากแอดมิน:</strong></p>
-                                    <p id="admin-comment-{{ file.id }}" class="text-muted">
+                                    <p id="admin-comment-{{ file.id }}" class="text-danger">
                                         {{ file.comment if file.comment else 'ไม่มีหมายเหตุ' }}
                                     </p>
                                     <a href="{{ url_for('uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-primary" target="_blank">
@@ -108,7 +108,7 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        setInterval(fetchStatusUpdates, 5000); // อัปเดตสถานะทุก 5 วินาที
+        setInterval(fetchStatusUpdates, 100000); // อัปเดตสถานะทุก 1 นาที
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -17,49 +17,71 @@
                 <strong>Kalasin University - รายงาน</strong>
             </a>
             <div class="ms-auto d-flex">
-                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+                <a href="javascript:void(0);" class="btn btn-danger fw-bold px-4 py-2" onclick="logoutAndRedirect()">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </a>
             </div>
         </div>
     </nav>
     
     <div class="container mt-5">
         <h2 class="text-center mb-4">📊 รายงานและสถิติการใช้งาน</h2>
-        <div class="container">
-            <div class="row g-4 justify-content-center">
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="card text-white bg-primary text-center">
-                        <div class="card-header">👥 จำนวนผู้ใช้ทั้งหมด</div>
-                        <div class="card-body">
-                            <h3 class="card-title">{{ total_users }}</h3>
-                        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card text-white bg-primary text-center">
+                    <div class="card-header">👥 จำนวนผู้ใช้ทั้งหมด</div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ total_users }}</h3>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="card text-white bg-success text-center">
-                        <div class="card-header">📂 ไฟล์ที่ถูกอัปโหลด</div>
-                        <div class="card-body">
-                            <h3 class="card-title">{{ total_files }}</h3>
-                        </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card text-white bg-success text-center">
+                    <div class="card-header">📂 ไฟล์ที่ถูกอัปโหลด</div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ total_files }}</h3>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="card text-white bg-warning text-center">
-                        <div class="card-header">✅ ไฟล์ที่อนุมัติ</div>
-                        <div class="card-body">
-                            <h3 class="card-title">{{ approved_files }}</h3>
-                        </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card text-white bg-warning text-center">
+                    <div class="card-header">✅ ไฟล์ที่อนุมัติ</div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ approved_files }}</h3>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="card text-white bg-danger text-center">
-                        <div class="card-header">⏳ ไฟล์ที่รออนุมัติ</div>
-                        <div class="card-body">
-                            <h3 class="card-title">{{ pending_files }}</h3>
-                        </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="card text-white bg-danger text-center">
+                    <div class="card-header">⏳ ไฟล์ที่รออนุมัติ</div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ pending_files }}</h3>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function logoutAndRedirect() {
+            // ส่งผู้ใช้ไปที่หน้าออกจากระบบ
+            window.location.href = "{{ url_for('logout') }}";
+            
+            // ล้าง session และป้องกันการย้อนกลับ
+            setTimeout(function() {
+                window.history.replaceState(null, null, window.location.href);
+                window.location.href = "{{ url_for('login') }}";
+            }, 500);
+        }
+
+        window.onload = function() {
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+            window.onpopstate = function(event) {
+                window.location.href = "{{ url_for('login') }}";
+            };
+        };
+    </script>
 </body>
 </html>

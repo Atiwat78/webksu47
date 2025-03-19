@@ -44,6 +44,35 @@
             border-radius: 10px;
             transition: all 0.3s ease-in-out;
         }
+
+        #success-message {
+            display: none;
+            text-align: center;
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        #preloader .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .upload-btn {
+            margin-bottom: 20px; /* เพิ่มระยะห่างจากข้อความ */
+        }
     </style>
 </head>
 <body>
@@ -69,6 +98,7 @@
                     <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
                 </a>
             </div>
+        </div>
     </nav>
 
     <div class="container mt-5">
@@ -78,7 +108,7 @@
             <p><i class="fas fa-envelope"></i> อีเมล: <strong>{{ email }}</strong></p> <!-- ✅ เพิ่มอีเมล -->
             <p><i class="fas fa-user-tag"></i> บทบาท: <strong>{{ role }}</strong></p>
             
-            <form action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data">
+            <form id="uploadForm" action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data" onsubmit="showSuccessMessage(event);">
                 <div class="mb-3">
                     <h5>เอกสารประกอบการสอน (ผศ.)</h5>
                     <input type="file" name="file1" accept=".pdf, .doc, .docx" class="form-control">
@@ -91,11 +121,17 @@
                     <h5>ผลงานทางวิชาการ</h5>
                     <input type="file" name="file3" accept=".pdf, .doc, .docx" class="form-control">
                 </div>
-                <button type="submit" class="btn btn-success fw-bold px-4 py-2">
+                <button type="submit" class="btn btn-success fw-bold px-4 py-2 upload-btn">
                     <i class="fas fa-upload"></i> Upload
                 </button>
-                
             </form>
+
+            <!-- Success Message -->
+            <div id="success-message">
+                <!-- รูปภาพที่จะแสดง -->
+                <img src="static/images/contatatatat585885.gif" alt="Success" style="width: 40px; height: 40px; margin-right: 10px;">
+                <i class="fas fa-check-circle"></i> อัปโหลดไฟล์สำเร็จ!
+            </div>
             
             <h2 class="mt-4"><i class="fas fa-folder"></i> ไฟล์ของคุณ</h2>
             <ul class="list-group">
@@ -117,6 +153,20 @@
         window.onload = function () {
             document.getElementById("preloader").style.display = "none";
         };
+
+        // ฟังก์ชันสำหรับแสดงข้อความและรูปเมื่อการอัปโหลดเสร็จสิ้น
+        function showSuccessMessage(event) {
+            event.preventDefault(); // หยุดการรีเฟรชหน้าจอ
+
+            // แสดงข้อความสำเร็จ
+            const message = document.getElementById("success-message");
+            message.style.display = "block"; // แสดงข้อความสำเร็จ
+
+            // ซ่อนข้อความหลังจาก 5 วินาที
+            setTimeout(() => {
+                message.style.display = "none"; // ซ่อนข้อความหลัง 5 วินาที
+            }, 5000);
+        }
     </script>
 </body>
 </html>

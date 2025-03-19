@@ -43,6 +43,10 @@
             color: orange;
             font-weight: bold;
         }
+        .status-rejected {
+            color: red;
+            font-weight: bold;
+        }
         .comment-box {
             min-height: 80px;
             border: 1px solid #ccc;
@@ -50,12 +54,10 @@
             padding: 10px;
             resize: vertical;
         }
-        
     </style>
 </head>
 <body>
 
-    <!-- ✅ Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand ms-2" href="{{ url_for('admin_dashboard') }}">
@@ -89,12 +91,11 @@
         <div class="file-card">
             <p><i class="fas fa-file"></i> <strong>{{ file.filename }}</strong></p>
             <p>📌 สถานะ: 
-                <span class="{% if file.status == 'อนุมัติแล้ว' %}status-approved{% else %}status-pending{% endif %}">
+                <span id="status-{{ file.id }}" class="{% if file.status == 'อนุมัติแล้ว' %}status-approved{% elif file.status == 'ไม่อนุมัติ' %}status-rejected{% else %}status-pending{% endif %}">
                     {{ file.status }}
                 </span>
             </p>
-            <!-- เพิ่มช่องสำหรับให้แอดมินพิมพ์เหตุผล -->
-            <textarea class="form-control mt-2" id="comment-{{ file.id }}" placeholder="เพิ่มหมายเหตุ (ถ้ามี)">{{ file.comment if file.comment else '' }}</textarea>
+            <textarea class="form-control mt-2 comment-box" id="comment-{{ file.id }}" placeholder="เพิ่มหมายเหตุ (ถ้ามี)">{{ file.comment if file.comment else '' }}</textarea>
             
             <div class="d-flex mt-2">
                 <a href="{{ url_for('uploaded_file', filename=file.filename) }}" class="btn btn-success btn-sm me-2" target="_blank">
@@ -103,60 +104,46 @@
                 <button class="btn btn-warning btn-sm me-2" onclick="approveFile({{ file.id }})" id="approve-btn-{{ file.id }}">
                     <i class="fas fa-check-circle"></i> อนุมัติ
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="saveComment({{ file.id }})">
-                    <i class="fas fa-save"></i> บันทึกหมายเหตุ
+                <button class="btn btn-danger btn-sm me-2" onclick="rejectFile({{ file.id }})" id="reject-btn-{{ file.id }}">
+                    <i class="fas fa-times-circle"></i> ไม่อนุมัติ
                 </button>
             </div>
         </div>
         {% endfor %}
-    {% else %}
-        <p class="text-muted">⛔ ผู้ใช้นี้ยังไม่มีการอัปโหลดไฟล์</p>
-    {% endif %}
-    
+        {% else %}
+            <p class="text-muted">⛔ ผู้ใช้นี้ยังไม่มีการอัปโหลดไฟล์</p>
+        {% endif %}
     </div>
 
     <script>
         function approveFile(fileId) {
-            if (confirm("✅ คุณต้องการอนุมัติไฟล์นี้หรือไม่?")) {
-                fetch(`/approve_file/${fileId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        alert(data.message);
-                        document.getElementById(`status-${fileId}`).innerHTML = `<span class="status-approved">อนุมัติแล้ว</span>`;
-                        document.getElementById(`approve-btn-${fileId}`).remove();  // ซ่อนปุ่มเมื่ออนุมัติแล้ว
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            }
+            fetch(`/approve_file/${fileId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById(`status-${fileId}`).innerHTML = `<span class="status-approved">อนุมัติแล้ว</span>`;
+                document.getElementById(`approve-btn-${fileId}`).remove();
+                document.getElementById(`reject-btn-${fileId}`).remove();
+            });
         }
 
-        function saveComment(fileId) {
+        function rejectFile(fileId) {
             const comment = document.getElementById(`comment-${fileId}`).value;
-            
-            fetch(`/save_comment/${fileId}`, {
+            if (!comment.trim()) return alert("⚠️ กรุณากรอกหมายเหตุ");
+
+            fetch(`/reject_file/${fileId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ comment: comment })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    alert('บันทึกหมายเหตุเรียบร้อย');
-                } else {
-                    alert('เกิดข้อผิดพลาดในการบันทึก');
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                alert(data.message);
+                document.getElementById(`status-${fileId}`).innerHTML = `<span class="status-rejected">ไม่อนุมัติ</span>`;
+                document.getElementById(`approve-btn-${fileId}`).remove();
+                document.getElementById(`reject-btn-${fileId}`).remove();
+            });
         }
-        
     </script>
 
 </body>

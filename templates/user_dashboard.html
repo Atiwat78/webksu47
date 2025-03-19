@@ -158,7 +158,7 @@
                                 style="height: 150px; object-fit: contain; padding: 10px;">
                                 
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-user"></i> จัดการข้อมูลของเเละอัพโหลดเอกสาร</h5>
+                                    <h5 class="card-title"><i class="fa-solid fa-folder"></i> จัดการข้อมูลของเเละอัพโหลดเอกสาร</h5>
                                     <p class="card-text">แก้ไขข้อมูลเเละอัพโหลดเอกสารเพือดำเนินการขอตำเเหน่งทางวิชาการ</p>
                                     <a href="{{ url_for('profile') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
                                         <i class="fas fa-id-card"></i> อัพโหลดไฟล์
@@ -174,8 +174,8 @@
                                 alt="Manage Users"
                                 style="height: 150px; object-fit: contain; padding: 10px;">
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
-                                    <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
+                                    <h5 class="card-title"><i class="fas fa-user"></i> จัดการเเละเเก้ไขโปรไฟล์</h5>
+                                    <p class="card-text">การจัดการและแก้ไขโปรไฟล์ในระบบหมายถึงการปรับข้อมูลส่วนตัวของผู้ใช้ให้เป็นปัจจุบันและถูกต้อง</p>
                                     <a href="{{ url_for('change_password') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
                                         <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
                                     </a>
@@ -190,8 +190,8 @@
                                 alt="Manage Users"
                                 style="height: 150px; object-fit: contain; padding: 10px;">
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-envelope"></i> ติดต่อเรา</h5>
-                                    <p class="card-text">ช่องทางติดต่อเพิ่มเติม</p>
+                                    <h5 class="card-title"><i class="fa-solid fa-phone"></i> ติดต่อเรา</h5>
+                                    <p class="card-text">ช่องทางติดต่อเพิ่มเติมช่องทางหรือวิธีการที่ผู้ใช้สามารถติดต่อหรือสื่อสารกับเจ้าหน้าที่เพื่อขอข้อมูลเพิ่มเติม แก้ไขปัญหาหรือข้อสงสัย</p>
                                     <a href="{{ url_for('contact') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
                                         <i class="fas fa-comments"></i> ติดต่อเรา
                                     </a>
@@ -202,11 +202,13 @@
                         <!-- การ์ด 4 -->
                         <div class="col-md-4">
                             <div class="card text-center h-100 shadow-sm">
-                                <img src="static/images/toa-heftiba-_UIVmIBB3JU-unsplash.jpg" class="card-img-top" alt="Help">
+                                <img src="static/images/Filefggfg.gif" class="card-img-top"
+                                alt="Manage Users"
+                                style="height: 150px; object-fit: contain; padding: 10px;">
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-question-circle"></i> ขั้นตอนการใช้งานเเละเอกสาร</h5>
+                                    <h5 class="card-title"><i class="fa-solid fa-list"></i> ขั้นตอนการใช้งานเเละเอกสาร</h5>
                                     <p class="card-text">เอกสารและคำแนะนำเกี่ยวกับขั้นตอนและหลักเกณฑ์</p>
-                                    <a href="{{ url_for('help') }}" class="btn btn-success fw-bold px-4 py-2 mt-auto">
+                                    <a href="{{ url_for('help') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
                                         <i class="fas fa-info-circle"></i> เข้าสู่ศูนย์ช่วยเหลือ
                                     </a>
                                 </div>
@@ -216,12 +218,14 @@
                         <!-- การ์ด 5 -->
                         <div class="col-md-4">
                             <div class="card text-center h-100 shadow-sm">
-                                <img src="static/images/setting-up-text-with-rotating-cog-wheels-settings-hud-free-video.jpg" class="card-img-top" alt="Settings">
+                                <img src="static/images/setthinhsss.gif" class="card-img-top"
+                                alt="Manage Users"
+                                style="height: 150px; object-fit: contain; padding: 10px;">
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-cog"></i> ตั้งค่าระบบ</h5>
-                                    <p class="card-text">ปรับแต่งการใช้งานระบบตามต้องการ</p>
-                                    <a href="{{ url_for('settings') }}" class="btn btn-dark fw-bold px-4 py-2 mt-auto">
-                                        <i class="fas fa-tools"></i> ตั้งค่าระบบ
+                                    <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
+                                    <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
+                                    <a href="{{ url_for('change_password') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                                        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
                                     </a>
                                 </div>
                             </div>
@@ -230,7 +234,9 @@
                         <!-- การ์ด 6 -->
                         <div class="col-md-4">
                             <div class="card text-center h-100 shadow-sm">
-                                <img src="static/images/gettyimages-483551566-640x640 (1).jpg" class="card-img-top" alt="Logout">
+                                <img src="static/images/arrow.gif" class="card-img-top"
+                                alt="Manage Users"
+                                style="height: 150px; object-fit: contain; padding: 10px;">
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
                                     <h5 class="card-title"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</h5>
                                     <p class="card-text">ออกจากระบบเพื่อความปลอดภัย</p>

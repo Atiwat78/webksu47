@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ศูนย์ช่วยเหลือ</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/your-fontawesome-key.js" crossorigin="anonymous"></script>
 </head>
@@ -40,29 +41,78 @@
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#helpAccordion">
                     <div class="accordion-body">
-                        <ol>
-                            <li>ระยะเวลาและชั่วโมงสอน
-                                <ol style="list-style-type: none;">
-                                    <li>1.1) มีระยะเวลาการปฏิบัติงานครบตามเกณฑ์</li>
-                                    <li>1.2) มีชั่วโมงสอนประจำวิชาใดวิชาหนึ่งในหลักสูตร(ผศ./รส./ศ.)</li>
-                                </ol>
+                        <h5 class="mb-3"><i class="fas fa-user-graduate me-2"></i> คุณสมบัติและผลงานทางวิชาการ</h5>
+                        <ol class="ps-3">
+                            <li class="mb-3">
+                                <strong><i class="fas fa-clock me-2"></i> ระยะเวลาและชั่วโมงสอน:</strong>
+                                <ul class="text-muted small">
+                                    <li>- มีระยะเวลาการปฏิบัติงานครบตามเกณฑ์</li>
+                                    <li>- มีชั่วโมงสอนประจำวิชาใดวิชาหนึ่งในหลักสูตร (ผศ./รศ./ศ.)</li>
+                                </ul>
                             </li>
-                            <li>เอกสารประกอบการสอน(ผศ.)/เอกสารประกอบคำสอน(รศ.) จำนวน ๔ เล่ม</li>
-                            <li>ประเมินผลการสอบ (ผ่าน ระดับชำนาญ/ชำนาญพิเศษ/เชี่ยวชาญ)
-                                ตามข้อบังคับมหาวิทยาลัยการสินธุ์ว่าด้วยหลักเกณฑ์และวิธีการ
-                                ว่าด้วยหลักเกณฑ์ แต่งตั้งบุคคลให้ดำรงตำแหน่ง ผศ./รส./ศ. พ.ศ. ๒๕๖๕
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-book me-2"></i> เอกสารประกอบการสอน:</strong>
+                                <p class="text-muted small">- เอกสารประกอบการสอน (ผศ.) / เอกสารประกอบคำสอน (รศ.) (จำนวน 4 เล่ม)</p>
                             </li>
-                            <li>ผลงานทางวิชาการ
-                                <ol style="list-style-type: none;">
-                                    <li>4.1) งานวิจัย</li>
-                                    <li>4.2) ผลงานรับใช้สังคม</li>
-                                    <li>4.3) ผลงานทางวิชาการในลักษณะอื่น</li>
-                                    <li>4.4) ตำราหรือหนังสือ</li>
-                                </ol>
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-tasks me-2"></i> ประเมินผลการสอบ:</strong>
+                                <p class="text-muted small">- ผ่านระดับชำนาญ / ชำนาญพิเศษ / เชี่ยวชาญ</p>
+                                <p class="text-muted small">* ตามข้อบังคับมหาวิทยาลัยว่าด้วยหลักเกณฑ์และวิธีการแต่งตั้งบุคคลให้ดำรงตำแหน่ง ผศ./รศ./ศ.</p>
                             </li>
-                            <li>ผลงานทางวิชาการ จำนวน ๘ เล่ม (กพอ.๐๓ ๘ ชุด)</li>
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-flask me-2"></i> ผลงานทางวิชาการ:</strong>
+                                <ul class="text-muted small">
+                                    <li>- งานวิจัย</li>
+                                    <li>- ผลงานรับใช้สังคม</li>
+                                    <li>- ผลงานทางวิชาการในลักษณะอื่น</li>
+                                    <li>- ตำราหรือหนังสือ</li>
+                                </ul>
+                            </li>
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-folder-open me-2"></i> เอกสารที่ต้องใช้:</strong>
+                                <ul class="text-muted small">
+                                    <li>- กพอ.๐๓ (จำนวน 8 ชุด)</li>
+                                    <li>- เอกสารประกอบการสอน (จำนวน 4 ชุด)</li>
+                                    <li>- มคอ.๐๓ (จำนวน 4 ชุด)</li>
+                                    <li>- แบบ ปผ.๑ (จำนวน 1 ชุด)</li>
+                                    <li>- ผลการประเมินการสอน (จำนวน 4 ชุด)</li>
+                                    <li>- ตารางสอนปีการศึกษา 2566 (จำนวน 4 ชุด)</li>
+                                </ul>
+                            </li>
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-book-open me-2"></i> ผลงานทางวิชาการ:</strong>
+                                <ul class="text-muted small">
+                                    <li>- รูปเล่มผลงานทางวิชาการ (จำนวน 8 เล่ม)</li>
+                                </ul>
+                            </li>
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-certificate me-2"></i> หนังสือรับรอง:</strong>
+                                <ul class="text-muted small">
+                                    <li>- หนังสือรับรองจริยธรรมและจรรยาบรรณทางวิชาการ (จำนวน 8 ชุด)</li>
+                                    <li>- หนังสือรับรองผลงานวิจัย (จำนวน 8 ชุด)</li>
+                                    <li>- หนังสือรับรองการเผยแพร่ผลงานทางวิชาการ (จำนวน 8 ชุด)</li>
+                                    <li>- แบบแสดงหลักฐานการมีส่วนร่วมในผลงาน (จำนวน 8 ชุด)</li>
+                                </ul>
+                            </li>
+                
+                            <li class="mb-3">
+                                <strong><i class="fas fa-user-clock me-2"></i> หลักฐานอื่น ๆ:</strong>
+                                <ul class="text-muted small">
+                                    <li>- หลักฐานแสดงประวัติการศึกษา (Transcript) ป.ตรี-เอก (จำนวน 1 ชุด)</li>
+                                    <li>- หลักฐานแสดงประวัติการทำงาน เช่น สัญญาจ้าง ก.พ.๗ (จำนวน 1 ชุด)</li>
+                                    <li>- บทคัดย่อวิทยานิพนธ์ ขอสำเร็จการศึกษาในแต่ละระดับการศึกษา (จำนวน 1 ชุด)</li>
+                                </ul>
+                            </li>
                         </ol>
                     </div>
+                </div>
+                
                 </div>
                 
                 
@@ -108,6 +158,7 @@
                             <li><strong>การขอคำปรึกษาหรือสอบถามข้อมูล:</strong>
                                 <p>หากคุณมีคำถามหรือต้องการคำปรึกษาเกี่ยวกับการสมัคร สามารถติดต่อทีมงานได้ผ่านช่องทางที่กำหนด เช่น โทรศัพท์, อีเมล หรือแชทภายในระบบ</p>
                             </li>
+                           
                         </ol>
                     </div>
                 </div>
@@ -149,6 +200,35 @@
                         </div>
                     </div>
                 </div>
+                
+
+                <script>
+                    function logout() {
+                        // เปลี่ยนเส้นทางไปที่หน้า logout
+                        window.location.href = "{{ url_for('logout') }}";
+                
+                        // เคลียร์ session history และเปลี่ยนเส้นทางไปที่หน้า login
+                        setTimeout(function () {
+                            window.location.replace("{{ url_for('login') }}");
+                        }, 100);
+                    }
+                
+                    // ป้องกันการย้อนกลับหลังจากออกจากระบบ
+                    (function () {
+                        // ลบหน้าเดิมออกจาก history
+                        window.history.replaceState(null, "", window.location.href);
+                
+                        // บล็อกการย้อนกลับ
+                        window.onpopstate = function () {
+                            window.history.replaceState(null, "", window.location.href);
+                        };
+                
+                        // บังคับให้เบราว์เซอร์เดินหน้าตลอด
+                        setTimeout(function () {
+                            window.history.forward();
+                        }, 0);
+                    })();
+                </script>
                 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

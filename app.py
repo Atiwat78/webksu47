@@ -117,11 +117,26 @@ def register_user():
 @app.route('/upload_profile', methods=['POST'])
 def upload_profile():
     if 'user_id' not in session:
+        flash("❌ กรุณาเข้าสู่ระบบก่อนอัปโหลดไฟล์", "danger")
         return redirect(url_for('login'))
 
     user = User.query.get(session['user_id'])
-    for i in range(1, 4):
-        file = request.files.get(f'file{i}')
+
+    # ✅ รายชื่อฟิลด์ที่ต้องการดึงข้อมูล
+    file_fields = [
+        "file_teaching",        # เอกสารประกอบการสอน (ผศ.)
+        "file_teaching_rsu",    # เอกสารประกอบคำสอน (รศ.)
+        "file_research",        # ผลงานทางวิชาการ
+        "file_mko03",           # มคอ.03
+        "file_pp1",             # แบบ ปพ.1
+        "file_evaluation",      # ผลการประเมินการสอน
+        "file_academic"         # รูปเล่มทางวิชาการ
+    ]
+
+    files_uploaded = 0  # ตัวนับไฟล์ที่อัปโหลดสำเร็จ
+
+    for field in file_fields:
+        file = request.files.get(field)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -129,10 +144,20 @@ def upload_profile():
 
             new_file = File(filename=filename, file_path=file_path, user_id=user.id)
             db.session.add(new_file)
+            files_uploaded += 1
+            print(f"✅ อัปโหลดไฟล์: {filename} ที่ {file_path}")
 
     db.session.commit()
-    flash("✅ อัปโหลดไฟล์สำเร็จ!", "success")
+
+    if files_uploaded > 0:
+        flash(f"✅ อัปโหลดไฟล์สำเร็จทั้งหมด {files_uploaded} รายการ!", "success")
+    else:
+        flash("❌ กรุณาเลือกไฟล์เพื่ออัปโหลด!", "danger")
+
     return redirect(url_for('profile'))
+
+
+
 
 # ✅ Route: Profile
 @app.route('/profile')
@@ -555,10 +580,14 @@ def reports():
 
 
 
+@app.route('/admin/contact')
+def admin_contact():
+    if 'admin' not in session or not session.get('admin'):
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้", "danger")
+        return redirect(url_for('admin_login'))  # ถ้าไม่ใช่แอดมิน ให้ไปหน้า login
 
-
-
-
+    messages = ContactMessage.query.all()  # ดึงข้อมูลข้อความทั้งหมด
+    return render_template('admin_contact.html', messages=messages)
 
 
 

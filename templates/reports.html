@@ -64,14 +64,13 @@
 
     <script>
         function logoutAndRedirect() {
-            // ส่งผู้ใช้ไปที่หน้าออกจากระบบ
-            window.location.href = "{{ url_for('logout') }}";
+            // เช็คว่าเป็นแอดมินหรือไม่ แล้วเด้งไปที่หน้าล็อกอินของแอดมิน
+            let isAdmin = "{{ session.get('role') }}" === "admin";
+            let redirectUrl = isAdmin ? "{{ url_for('admin_login') }}" : "{{ url_for('login') }}";
             
-            // ล้าง session และป้องกันการย้อนกลับ
-            setTimeout(function() {
-                window.history.replaceState(null, null, window.location.href);
-                window.location.href = "{{ url_for('login') }}";
-            }, 500);
+            fetch("{{ url_for('logout') }}").then(() => {
+                window.location.replace(redirectUrl);
+            });
         }
 
         window.onload = function() {
@@ -79,7 +78,9 @@
                 window.history.replaceState(null, null, window.location.href);
             }
             window.onpopstate = function(event) {
-                window.location.href = "{{ url_for('login') }}";
+                let isAdmin = "{{ session.get('role') }}" === "admin";
+                let redirectUrl = isAdmin ? "{{ url_for('admin_login') }}" : "{{ url_for('login') }}";
+                window.location.replace(redirectUrl);
             };
         };
     </script>

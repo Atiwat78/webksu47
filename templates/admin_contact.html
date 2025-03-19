@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แอดมิน - จัดการข้อความผู้ใช้</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: white;
+            color: black;
+        }
+
+        .navbar {
+            background: #000000;
+            backdrop-filter: blur(10px);
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.05);
+            color: black;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .message-item {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-custom {
+            padding: 5px 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand ms-2" href="{{ url_for('admin_dashboard') }}">
+                <img src="https://upload.wikimedia.org/wikipedia/th/4/4e/Kalasin_University_Seal.svg" alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
+                <strong>Kalasin University - Admin</strong>
+            </a>
+            <div class="ms-auto d-flex">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Container -->
+    <div class="container mt-5">
+        <div class="card shadow-lg">
+            <div class="card-body">
+                <h1 class="text-center mb-4"><i class="fas fa-envelope"></i> ข้อความจากผู้ใช้</h1>
+                <p class="text-center">ดูและจัดการข้อความที่ผู้ใช้ส่งมา</p>
+                <hr>
+
+                <!-- รายการข้อความ -->
+                <div id="messageList">
+                    {% for message in messages %}
+                    <div class="message-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><i class="fas fa-user"></i> {{ message.user_name }}</strong> 
+                            <span class="text-muted">({{ message.timestamp }})</span>
+                            <p class="m-0 text-truncate" style="max-width: 300px;">{{ message.text }}</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-custom" onclick="viewMessage({{ message.id }})">
+                                <i class="fas fa-eye"></i> ดูรายละเอียด
+                            </button>
+                            <button class="btn btn-danger btn-custom" onclick="deleteMessage({{ message.id }})">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal แสดงข้อความ -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-comment-alt"></i> รายละเอียดข้อความ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="messageContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewMessage(messageId) {
+            fetch(`/get_message/${messageId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("messageContent").textContent = data.text;
+                    new bootstrap.Modal(document.getElementById("messageModal")).show();
+                });
+        }
+
+        function deleteMessage(messageId) {
+            if (confirm("คุณต้องการลบข้อความนี้หรือไม่?")) {
+                fetch(`/delete_message/${messageId}`, { method: "DELETE" })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("ลบข้อความเรียบร้อยแล้ว");
+                            location.reload();
+                        }
+                    });
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

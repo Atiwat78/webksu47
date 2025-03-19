@@ -108,23 +108,40 @@
             <p><i class="fas fa-envelope"></i> อีเมล: <strong>{{ email }}</strong></p> <!-- ✅ เพิ่มอีเมล -->
             <p><i class="fas fa-user-tag"></i> บทบาท: <strong>{{ role }}</strong></p>
             
-            <form id="uploadForm" action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data" onsubmit="showSuccessMessage(event);">
+            <form id="uploadForm" action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <h5>เอกสารประกอบการสอน (ผศ.)</h5>
-                    <input type="file" name="file1" accept=".pdf, .doc, .docx" class="form-control">
+                    <input type="file" name="file_teaching" accept=".pdf, .doc, .docx" class="form-control">
                 </div>
                 <div class="mb-3">
                     <h5>เอกสารประกอบคำสอน (รศ.)</h5>
-                    <input type="file" name="file2" accept=".pdf, .doc, .docx" class="form-control">
+                    <input type="file" name="file_teaching_rsu" accept=".pdf, .doc, .docx" class="form-control">
                 </div>
                 <div class="mb-3">
                     <h5>ผลงานทางวิชาการ</h5>
-                    <input type="file" name="file3" accept=".pdf, .doc, .docx" class="form-control">
+                    <input type="file" name="file_research" accept=".pdf, .doc, .docx" class="form-control">
                 </div>
-                <button type="submit" class="btn btn-success fw-bold px-4 py-2 upload-btn">
+                <div class="mb-3">
+                    <h5>มคอ.๐๓</h5>
+                    <input type="file" name="file_mko03" accept=".pdf, .doc, .docx" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <h5>แบบ ปพ.1</h5>
+                    <input type="file" name="file_pp1" accept=".pdf, .doc, .docx" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <h5>ผลการประเมินการสอน</h5>
+                    <input type="file" name="file_evaluation" accept=".pdf, .doc, .docx" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <h5>รูปเล่มทางวิชาการ</h5>
+                    <input type="file" name="file_academic" accept=".pdf, .doc, .docx" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success fw-bold px-4 py-2">
                     <i class="fas fa-upload"></i> Upload
                 </button>
             </form>
+            
 
             <!-- Success Message -->
             <div id="success-message">
@@ -153,20 +170,40 @@
         window.onload = function () {
             document.getElementById("preloader").style.display = "none";
         };
-
+    
         // ฟังก์ชันสำหรับแสดงข้อความและรูปเมื่อการอัปโหลดเสร็จสิ้น
         function showSuccessMessage(event) {
             event.preventDefault(); // หยุดการรีเฟรชหน้าจอ
-
+    
             // แสดงข้อความสำเร็จ
             const message = document.getElementById("success-message");
             message.style.display = "block"; // แสดงข้อความสำเร็จ
-
+    
             // ซ่อนข้อความหลังจาก 5 วินาที
             setTimeout(() => {
                 message.style.display = "none"; // ซ่อนข้อความหลัง 5 วินาที
             }, 5000);
         }
+    
+        // ฟังก์ชันสำหรับออกจากระบบ
+        function logout() {
+            // เปลี่ยนเส้นทางไปที่หน้า logout
+            window.location.href = "{{ url_for('logout') }}";
+    
+            // เคลียร์ session history และเปลี่ยนเส้นทางไปที่หน้า login
+            setTimeout(function () {
+                window.location.replace("{{ url_for('login') }}");
+            }, 100);
+        }
+    
+        // ป้องกันการย้อนกลับหลังจากออกจากระบบ
+        (function () {
+            window.history.pushState(null, "", window.location.href);
+            window.onpopstate = function () {
+                window.history.pushState(null, "", window.location.href);
+            };
+        })();
     </script>
+    
 </body>
 </html>

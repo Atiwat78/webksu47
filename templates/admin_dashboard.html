@@ -165,15 +165,15 @@
                         <!-- การ์ด ตั้งค่าระบบ -->
 <div class="col-md-4">
     <div class="card text-center h-100 shadow-sm">
-        <img src="static/images/HTTSDS.gif"
+        <img src="static/images/chattt.gif"
              class="card-img-top"
              alt="Settings"
              style="height: 120px; object-fit: contain; padding: 10px;">
         <div class="card-body d-flex flex-column align-items-center justify-content-center">
             <h5 class="card-title"><i class="fas fa-cogs"></i> ข้อความจากผู้ใช้งาน</h5>
             <p class="card-text">เเบบติดต่อเพิ่มเติมของผู้ใช้</p>
-            <a href="{{ url_for('settings') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
-                <i class="fas message"></i> ตั้งค่า
+            <a href="{{ url_for('admin_contact') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
+                <i class="fas message"></i> ดูข้อความจากผู้ใช้
             </a>
         </div>
     </div>
@@ -204,24 +204,7 @@
         </div>
     </div>
 
-    <!-- Chat Box -->
-    <button id="chat-btn" onclick="toggleChat()">
-        <i class="fas fa-comments"></i>
-    </button>
-    <div id="chat-box">
-        <div class="chat-header">💬 แชทแอดมิน</div>
-        <div class="chat-body">...</div>
-        <div class="chat-footer">
-            <input type="text" class="form-control" placeholder="พิมพ์ข้อความ...">
-        </div>
-    </div>
-
-    <script>
-        function toggleChat() {
-            document.getElementById('chat-box').style.display = 
-                document.getElementById('chat-box').style.display === 'none' ? 'flex' : 'none';
-        }
-    </script>
+    
 
 </body>
 </html>

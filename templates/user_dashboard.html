@@ -103,14 +103,22 @@
                 <img src="https://upload.wikimedia.org/wikipedia/th/thumb/4/4e/Kalasin_University_Seal.svg/1200px-Kalasin_University_Seal.svg.png" alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
                 <strong>Kalasin University</strong>
             </a>
+
                       
             <div class="ms-auto d-flex">
                 <a href="{{ url_for('status') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
                     <img src="{{ url_for('static', filename='images/stasussyyy.gif') }}" style="height: 20px; margin-right: 5px;">
                     สถานะการดำเนินการ
                 </a>
+
+                <div class="ms-auto d-flex">
+                    <a href="{{ url_for('contact') }}" class="btn btn-success fw-bold px-4 py-2 me-2 text-white">
+                        <img src="{{ url_for('static', filename='images/chatfff.gif') }}" style="height: 20px; margin-right: 5px;">
+                       </i> ติดต่อเรา
+                    </a>
+
                 <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
-                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                    <img src="{{ url_for('static', filename='images/arrow-white.gif') }}" style="height: 20px; margin-right: 5px;"></i> ออกจากระบบ
                 </a>
             </div>
             
@@ -167,33 +175,19 @@
                             </div>
                         </div>
                 
-                        <!-- การ์ด 2 -->
-                        <div class="col-md-4">
+                        
+                
+                         <!-- การ์ด 2 -->
+                         <div class="col-md-4">
                             <div class="card text-center h-100 shadow-sm">
                                 <img src="static/images/setthinhsss.gif" class="card-img-top"
                                 alt="Manage Users"
                                 style="height: 150px; object-fit: contain; padding: 10px;">
                                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-user"></i> จัดการเเละเเก้ไขโปรไฟล์</h5>
-                                    <p class="card-text">การจัดการและแก้ไขโปรไฟล์ในระบบหมายถึงการปรับข้อมูลส่วนตัวของผู้ใช้ให้เป็นปัจจุบันและถูกต้อง</p>
+                                    <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
+                                    <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
                                     <a href="{{ url_for('change_password') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
                                         <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                
-                        <!-- การ์ด 3 -->
-                        <div class="col-md-4">
-                            <div class="card text-center h-100 shadow-sm">
-                                <img src="static/images/system-regular-58-call-phone-hover-phone-ring.gif" class="card-img-top"
-                                alt="Manage Users"
-                                style="height: 150px; object-fit: contain; padding: 10px;">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fa-solid fa-phone"></i> ติดต่อเรา</h5>
-                                    <p class="card-text">ช่องทางติดต่อเพิ่มเติมช่องทางหรือวิธีการที่ผู้ใช้สามารถติดต่อหรือสื่อสารกับเจ้าหน้าที่เพื่อขอข้อมูลเพิ่มเติม แก้ไขปัญหาหรือข้อสงสัย</p>
-                                    <a href="{{ url_for('contact') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
-                                        <i class="fas fa-comments"></i> ติดต่อเรา
                                     </a>
                                 </div>
                             </div>
@@ -215,40 +209,8 @@
                             </div>
                         </div>
                 
-                        <!-- การ์ด 5 -->
-                        <div class="col-md-4">
-                            <div class="card text-center h-100 shadow-sm">
-                                <img src="static/images/setthinhsss.gif" class="card-img-top"
-                                alt="Manage Users"
-                                style="height: 150px; object-fit: contain; padding: 10px;">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน</h5>
-                                    <p class="card-text">อัปเดตรหัสผ่านเพื่อความปลอดภัย</p>
-                                    <a href="{{ url_for('change_password') }}" class="btn btn-primary fw-bold px-4 py-2 mt-auto">
-                                        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        
                 
-                        <!-- การ์ด 6 -->
-                        <div class="col-md-4">
-                            <div class="card text-center h-100 shadow-sm">
-                                <img src="static/images/arrow.gif" class="card-img-top"
-                                alt="Manage Users"
-                                style="height: 150px; object-fit: contain; padding: 10px;">
-                                <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                    <h5 class="card-title"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</h5>
-                                    <p class="card-text">ออกจากระบบเพื่อความปลอดภัย</p>
-                                    <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2 mt-auto">
-                                        <i class="fas fa-power-off"></i> ออกจากระบบ
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                
-                    </div>
-                </div>
                 
 
 

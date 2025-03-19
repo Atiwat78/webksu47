@@ -586,8 +586,10 @@ def admin_contact():
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้", "danger")
         return redirect(url_for('admin_login'))  # ถ้าไม่ใช่แอดมิน ให้ไปหน้า login
 
-    messages = ContactMessage.query.all()  # ดึงข้อมูลข้อความทั้งหมด
+    # ✅ ดึงข้อมูลข้อความทั้งหมด พร้อมชื่อผู้ใช้
+    messages = ContactMessage.query.all()
     return render_template('admin_contact.html', messages=messages)
+
 
 
 

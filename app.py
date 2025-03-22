@@ -48,6 +48,19 @@ class File(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
+class AcademicRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    request_type = db.Column(db.String(100), nullable=False)  # ประเภทของคำขอ
+    status = db.Column(db.String(50), nullable=False, default="approved_by_faculty")  # สถานะเริ่มต้น
+    comment = db.Column(db.Text, nullable=True)
+
+    user = db.relationship('User', backref='requests')  # ความสัมพันธ์กับ User
+
+    def __repr__(self):
+        return f"<AcademicRequest {self.request_type} by {self.user.username}>"
+
+
 # ✅ สร้างฐานข้อมูลถ้ายังไม่มี
 with app.app_context():
     db.create_all()
@@ -77,6 +90,10 @@ def login():
 
         flash("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!", "danger")
     return render_template('login.html')
+
+
+
+
 
 @app.route('/register_user', methods=['GET', 'POST'])
 def register_user():
@@ -409,19 +426,46 @@ def save_comment(file_id):
 #หน้าดูระบบ
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    if not session.get('admin'):  # ✅ ตรวจสอบว่า session['admin'] เป็น True หรือไม่
+    # ตรวจสอบว่า user มีการล็อกอินและมีสิทธิ์เป็นแอดมิน
+    if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
         flash("⚠️ กรุณาเข้าสู่ระบบแอดมิน!", "warning")
-        return redirect(url_for('admin_login'))
+        return redirect(url_for('admin_login'))  # หากไม่ใช่แอดมินจะถูกนำไปที่หน้า login
 
     users = User.query.all()  # ดึงข้อมูลผู้ใช้ทั้งหมด
     files = File.query.all()  # ดึงไฟล์ทั้งหมดจากฐานข้อมูล
     total_users = len(users)  # นับจำนวนผู้ใช้ทั้งหมด
 
-    return render_template('admin_dashboard.html', 
-                           username=ADMIN_USERNAME,  # ✅ ใช้ username ของแอดมิน
-                           users=users, 
-                           files=files, 
-                           total_users=total_users)
+    # ตรวจสอบว่าผู้ใช้งานเป็นแอดมินประเภทไหน
+    if session['role'] == 'admin':
+        # หากเป็นแอดมินคณะ
+        return render_template('admin_dashboard.html', 
+                               username=session['username'],  # ใช้ username จาก session
+                               users=users, 
+                               files=files, 
+                               total_users=total_users, 
+                               role="แอดมินคณะ")
+    elif session['role'] == 'admin_university':
+        # หากเป็นแอดมินมหาวิทยาลัย
+        return render_template('university_dashboard.html', 
+                               username=session['username'],  # ใช้ username จาก session
+                               users=users, 
+                               files=files, 
+                               total_users=total_users, 
+                               role="แอดมินมหาวิทยาลัย")
+        
+#หน้ามหาลัยมหาลัย        
+@app.route('/university_dashboard')
+def university_dashboard():
+    if 'role' not in session or session['role'] != 'admin_university':
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+        return redirect(url_for('admin_login'))
+    
+    # ดึงข้อมูลคำขอจากคณะที่รอการอนุมัติจากแอดมินมหาวิทยาลัย
+    requests = AcademicRequest.query.filter_by(status='approved_by_faculty').all()
+
+    return render_template('university_dashboard.html', requests=requests)
+
+
 
 
 
@@ -430,30 +474,37 @@ def admin_dashboard():
 def help():
     return render_template('help.html')
 
-#เข้าสู่ระบบเเอดมิน
+# เข้าสู่ระบบแอดมิน
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        role = request.form['role']  # รับค่า role ที่เลือกจากฟอร์ม
 
-        # ✅ เช็คว่าเป็นบัญชีแอดมินหรือไม่
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session['admin'] = True  # ตั้งค่า session ให้รู้ว่าเป็นแอดมิน
-            return redirect(url_for('admin_dashboard'))
+        user = User.query.filter_by(username=username).first()
+
+        if user and user.password == password and user.role == role:
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['role'] = user.role
+            if user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))  # แอดมินคณะ
+            elif user.role == 'admin_university':
+                return redirect(url_for('university_dashboard'))  # แอดมินมหาวิทยาลัย
+            else:
+                return redirect(url_for('user_dashboard'))  # ผู้ใช้ทั่วไป
 
         flash("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!", "danger")
-
     return render_template('admin_login.html')
 
-
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin01"  # รหัสเเอดมิน
-
+#ส่งข้อมูลของเเอดมิน
 @app.route('/admin_messages')
 def admin_messages():
     return render_template('admin_messages.html')
 
+
+#ลบข้อมุลผู้ใช้
 @app.route('/delete_user/<int:user_id>', methods=['POST', 'GET'])
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -589,6 +640,8 @@ def admin_contact():
     # ✅ ดึงข้อมูลข้อความทั้งหมด พร้อมชื่อผู้ใช้
     messages = ContactMessage.query.all()
     return render_template('admin_contact.html', messages=messages)
+
+
 
 
 

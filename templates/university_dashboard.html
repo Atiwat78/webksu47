@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดแอดมินมหาวิทยาลัย</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>แอดมินมหาวิทยาลัย</h2>
+
+        <h3>คำขอที่รอการอนุมัติ</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ชื่อผู้ขอ</th>
+                    <th>ประเภทคำขอ</th>
+                    <th>สถานะ</th>
+                    <th>การดำเนินการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ request.user.username }}</td>
+                    <td>{{ request.request_type }}</td>
+                    <td>{{ request.status }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('approve_request', request_id=request.id) }}">
+                            <button type="submit" class="btn btn-success">อนุมัติ</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('reject_request', request_id=request.id) }}">
+                            <button type="submit" class="btn btn-danger">ปฏิเสธ</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 import csv
-
+from functools import wraps
 # ✅ ตั้งค่าแอป Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -21,6 +21,18 @@ ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
 # ✅ เรียกใช้ SQLAlchemy
 db = SQLAlchemy(app)
+
+# --- ประกาศ Decorator ที่นี่ ---
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # เช็คใน session ว่ามี role เป็น admin หรือ admin_university
+        if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
+            flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # ✅ โมเดลฐานข้อมูล
 class User(db.Model):
@@ -355,15 +367,14 @@ def contact():
 # ✅ Route สำหรับอนุมัติไฟล์
 @app.route('/approve_file/<int:file_id>', methods=['POST'])
 def approve_file(file_id):
-    # ✅ ตรวจสอบสิทธิ์แอดมิน
-    if not session.get('admin'):
+    # ✅ ตรวจสอบสิทธิ์ โดยดูจาก session['role']
+    if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
         return jsonify({"status": "error", "message": "❌ คุณไม่มีสิทธิ์อนุมัติไฟล์นี้"}), 403
 
     file = File.query.get(file_id)
     if not file:
         return jsonify({"status": "error", "message": "❌ ไม่พบไฟล์"}), 404
 
-    # ✅ อัปเดตสถานะเป็น "อนุมัติแล้ว"
     file.status = "อนุมัติแล้ว"
     db.session.commit()
 
@@ -373,6 +384,7 @@ def approve_file(file_id):
         "file_id": file_id,
         "new_status": file.status
     })
+
 
 
 # ✅ Route สำหรับไม่อนุมัติไฟล์ (พร้อมหมายเหตุ)
@@ -423,47 +435,41 @@ def save_comment(file_id):
 
 
 
-#หน้าดูระบบ
+#หน้าดูระบบเเอดมินทั้งสอง 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    # ตรวจสอบว่า user มีการล็อกอินและมีสิทธิ์เป็นแอดมิน
-    if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
-        flash("⚠️ กรุณาเข้าสู่ระบบแอดมิน!", "warning")
-        return redirect(url_for('admin_login'))  # หากไม่ใช่แอดมินจะถูกนำไปที่หน้า login
+    # เช็ค role == 'admin'
+    if 'role' not in session or session['role'] != 'admin':
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+        return redirect(url_for('admin_login'))
+    
+    users = User.query.all()
+    files = File.query.all()
+    total_users = len(users)
+    return render_template('admin_dashboard.html',
+                           username=session['username'],
+                           users=users,
+                           files=files,
+                           total_users=total_users,
+                           role="แอดมินคณะ")
 
-    users = User.query.all()  # ดึงข้อมูลผู้ใช้ทั้งหมด
-    files = File.query.all()  # ดึงไฟล์ทั้งหมดจากฐานข้อมูล
-    total_users = len(users)  # นับจำนวนผู้ใช้ทั้งหมด
-
-    # ตรวจสอบว่าผู้ใช้งานเป็นแอดมินประเภทไหน
-    if session['role'] == 'admin':
-        # หากเป็นแอดมินคณะ
-        return render_template('admin_dashboard.html', 
-                               username=session['username'],  # ใช้ username จาก session
-                               users=users, 
-                               files=files, 
-                               total_users=total_users, 
-                               role="แอดมินคณะ")
-    elif session['role'] == 'admin_university':
-        # หากเป็นแอดมินมหาวิทยาลัย
-        return render_template('university_dashboard.html', 
-                               username=session['username'],  # ใช้ username จาก session
-                               users=users, 
-                               files=files, 
-                               total_users=total_users, 
-                               role="แอดมินมหาวิทยาลัย")
-        
-#หน้ามหาลัยมหาลัย        
+#หน้าดุระบบเเอดมินมหาลัย       
 @app.route('/university_dashboard')
 def university_dashboard():
+    # เช็ค role == 'admin_university'
     if 'role' not in session or session['role'] != 'admin_university':
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
         return redirect(url_for('admin_login'))
     
-    # ดึงข้อมูลคำขอจากคณะที่รอการอนุมัติจากแอดมินมหาวิทยาลัย
-    requests = AcademicRequest.query.filter_by(status='approved_by_faculty').all()
-
-    return render_template('university_dashboard.html', requests=requests)
+    users = User.query.all()
+    files = File.query.all()
+    total_users = len(users)
+    return render_template('university_dashboard.html',
+                           username=session['username'],
+                           users=users,
+                           files=files,
+                           total_users=total_users,
+                           role="แอดมินมหาวิทยาลัย")
 
 
 
@@ -480,23 +486,34 @@ def admin_login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        role = request.form['role']  # รับค่า role ที่เลือกจากฟอร์ม
 
         user = User.query.filter_by(username=username).first()
+        
+        
 
-        if user and user.password == password and user.role == role:
+        if user and user.password == password:
+            print("DEBUG => username:", user.username, "role:", user.role)
+            # ตรวจสอบว่า user เป็น 'admin' หรือ 'admin_university'
+            if user.role not in ['admin', 'admin_university']:
+                flash("❌ คุณไม่มีสิทธิ์เข้าสู่ระบบแอดมิน", "danger")
+                return redirect(url_for('admin_login'))
+
+            # ตั้งค่าสถานะใน session
             session['user_id'] = user.id
             session['username'] = user.username
+            session['admin'] = True             # <-- บรรทัดสำคัญ
             session['role'] = user.role
+
+            # เปลี่ยนเส้นทางไปยัง Dashboard ตาม role
             if user.role == 'admin':
-                return redirect(url_for('admin_dashboard'))  # แอดมินคณะ
+                return redirect(url_for('admin_dashboard'))
             elif user.role == 'admin_university':
-                return redirect(url_for('university_dashboard'))  # แอดมินมหาวิทยาลัย
-            else:
-                return redirect(url_for('user_dashboard'))  # ผู้ใช้ทั่วไป
+                return redirect(url_for('university_dashboard'))
 
         flash("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!", "danger")
+
     return render_template('admin_login.html')
+
 
 #ส่งข้อมูลของเเอดมิน
 @app.route('/admin_messages')
@@ -530,8 +547,15 @@ def delete_user(user_id):
 
 @app.route('/manage_users')
 def manage_users():
-    users = User.query.all()  # ดึงข้อมูลผู้ใช้ทั้งหมดจากฐานข้อมูล
+    # เช็ค Session ว่าเป็น Admin หรือไม่
+    if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+        return redirect(url_for('admin_login'))
+
+    # ผ่านเงื่อนไขแล้วค่อยดำเนินการ
+    users = User.query.all()
     return render_template('manage_users.html', users=users)
+
 
 
 
@@ -570,15 +594,23 @@ def view_user(user_id):
 def add_user():
     if request.method == 'POST':
         username = request.form.get('username')
+        email = request.form.get('email')  # ✅ สำคัญ! ต้องมีบรรทัดนี้
         password = request.form.get('password')
         role = request.form.get('role', 'user')
 
+        # เช็กซ้ำว่าไม่มี user/email ซ้ำ
         existing_user = User.query.filter_by(username=username).first()
+        existing_email = User.query.filter_by(email=email).first()
+
         if existing_user:
             flash("❌ ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว!", "danger")
             return redirect(url_for('add_user'))
+        if existing_email:
+            flash("❌ อีเมลนี้ถูกใช้ไปแล้ว!", "danger")
+            return redirect(url_for('add_user'))
 
-        new_user = User(username=username, password=password, role=role)
+        # ✅ ต้องใส่ email ตรงนี้ด้วย
+        new_user = User(username=username, email=email, password=password, role=role)
         db.session.add(new_user)
         db.session.commit()
 
@@ -609,24 +641,23 @@ def settings():
 
 @app.route('/reports')
 def reports():
-    if 'admin' not in session:  # ✅ เช็คว่าผู้ใช้ล็อกอินเป็นแอดมินหรือไม่
+    # เดิมคุณมีเช็คแบบนี้
+    if 'admin' not in session:  # หรือ if not session.get('admin'):
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
-        return redirect(url_for('admin_login'))  # ถ้าไม่ใช่แอดมิน ให้ไปที่หน้า login
+        return redirect(url_for('admin_login'))
 
-    # ✅ ดึงข้อมูลสถิติ
-    total_users = User.query.count()  # จำนวนผู้ใช้ทั้งหมด
-    total_files = File.query.count()  # จำนวนไฟล์ที่อัปโหลดทั้งหมด
-    approved_files = File.query.filter_by(status="อนุมัติแล้ว").count()  # จำนวนไฟล์ที่อนุมัติ
-    pending_files = File.query.filter_by(status="รออนุมัติ").count()  # จำนวนไฟล์ที่รออนุมัติ
+    # ผ่านเงื่อนไขแล้วดึงข้อมูลสถิติ
+    total_users = User.query.count()
+    total_files = File.query.count()
+    approved_files = File.query.filter_by(status="อนุมัติแล้ว").count()
+    pending_files = File.query.filter_by(status="รออนุมัติ").count()
 
+    return render_template('reports.html',
+                           total_users=total_users,
+                           total_files=total_files,
+                           approved_files=approved_files,
+                           pending_files=pending_files)
 
-
-    # ✅ ส่งข้อมูลไปยัง reports.html
-    return render_template('reports.html', 
-                           total_users=total_users, 
-                           total_files=total_files, 
-                           approved_files=approved_files, 
-                           pending_files=pending_files, )
                            
 
 
@@ -637,9 +668,10 @@ def admin_contact():
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้", "danger")
         return redirect(url_for('admin_login'))  # ถ้าไม่ใช่แอดมิน ให้ไปหน้า login
 
-    # ✅ ดึงข้อมูลข้อความทั้งหมด พร้อมชื่อผู้ใช้
     messages = ContactMessage.query.all()
     return render_template('admin_contact.html', messages=messages)
+
+
 
 
 

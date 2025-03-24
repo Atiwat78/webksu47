@@ -4,6 +4,10 @@ from werkzeug.utils import secure_filename
 import os
 import csv
 from functools import wraps
+from models import DocumentRequest
+
+
+
 # ✅ ตั้งค่าแอป Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -13,14 +17,19 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# ✅ เรียกใช้ SQLAlchemy
+db = SQLAlchemy(app)
+
+
 # ✅ ตั้งค่าอัปโหลดไฟล์
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static/uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
-# ✅ เรียกใช้ SQLAlchemy
-db = SQLAlchemy(app)
+
+
+
 
 # --- ประกาศ Decorator ที่นี่ ---
 def admin_required(f):
@@ -364,7 +373,7 @@ def contact():
 
     return render_template('contact.html')
 
-# ✅ Route สำหรับอนุมัติไฟล์
+# ✅ Route สำหรับอนุมัติไฟล์ของคณะ เเละเเสดงสถานะอ
 @app.route('/approve_file/<int:file_id>', methods=['POST'])
 def approve_file(file_id):
     # ✅ ตรวจสอบสิทธิ์ โดยดูจาก session['role']
@@ -375,19 +384,19 @@ def approve_file(file_id):
     if not file:
         return jsonify({"status": "error", "message": "❌ ไม่พบไฟล์"}), 404
 
-    file.status = "อนุมัติแล้ว"
+    file.status = "ได้รับการอนุมัติจากคณะแล้ว"
     db.session.commit()
 
     return jsonify({
         "status": "success",
-        "message": f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติแล้ว",
+        "message": f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากคณะแล้ว",
         "file_id": file_id,
         "new_status": file.status
     })
 
 
 
-# ✅ Route สำหรับไม่อนุมัติไฟล์ (พร้อมหมายเหตุ)
+# ✅ Route สำหรับไม่อนุมัติไฟล์ของคณะ (พร้อมหมายเหตุ)
 @app.route('/reject_file/<int:file_id>', methods=['POST'])
 def reject_file(file_id):
     # ✅ ตรวจสอบสิทธิ์แอดมิน
@@ -543,22 +552,26 @@ def delete_user(user_id):
 
     return redirect(url_for('manage_users'))
 
-#จัดการผู้ใช้
+#จัดการผู้ใช้ส่วนเเอดมินมหาลัย
 
 @app.route('/manage_users')
 def manage_users():
     # เช็ค Session ว่าเป็น Admin หรือไม่
     if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
-        return redirect(url_for('admin_login'))
+        return redirect(url_for('admin_login'))  # ถ้าไม่ใช่ admin, ให้ไปหน้า login
 
-    # ผ่านเงื่อนไขแล้วค่อยดำเนินการ
+    # ดึงข้อมูลผู้ใช้ทั้งหมด
     users = User.query.all()
+    
+    # ส่งข้อมูลไปยังเทมเพลต
     return render_template('manage_users.html', users=users)
 
 
 
 
+
+#เเก้ไขผู้ใช้
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
     user = User.query.get(user_id)
@@ -586,6 +599,13 @@ def view_user(user_id):
     files = File.query.filter_by(user_id=user.id).all()
 
     return render_template('view_user.html', user=user, files=files)
+
+
+#จัดการผู้ใช้ของระบบมหาลัย
+@app.route('/manage_users_ksu', endpoint='manage_users_ksu')
+def manage_users_ksu():
+    ...
+
 
 
 
@@ -670,6 +690,68 @@ def admin_contact():
 
     messages = ContactMessage.query.all()
     return render_template('admin_contact.html', messages=messages)
+
+#จัดการผู้ใช้คณะ
+@app.route('/manage_users_kana')
+def manage_users_kana():
+    # เช็ค Session ว่าเป็น Admin หรือไม่
+    if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+        return redirect(url_for('admin_login'))  # Redirect to login page if not admin
+
+    # ดึงข้อมูลผู้ใช้ที่ไม่ใช่ admin หรือ admin_university
+    users = User.query.filter(~User.role.in_(['admin', 'admin_university'])).all()
+
+    # แสดงผลข้อมูลใน template
+    return render_template('manage_users_kana.html', users=users)
+
+#คณะอนุมัติไปมหาลัย
+@app.route('/files_approved_faculty')
+def files_approved_faculty():
+    # ตรวจสอบว่าเป็นแอดมินมหาวิทยาลัยหรือไม่
+    if 'role' not in session or session['role'] != 'admin_university':
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+        return redirect(url_for('admin_login'))  # หากไม่ใช่ผู้ดูแลมหาวิทยาลัย ให้ไปหน้า login
+
+    # ดึงไฟล์ที่ได้รับการอนุมัติจากคณะ
+    try:
+        approved_files = File.query.filter_by(status='อนุมัติจากคณะ').all()
+        
+        # ตรวจสอบว่าไฟล์ที่ดึงมาจากฐานข้อมูลมีข้อมูลหรือไม่
+        if not approved_files:
+            flash("ยังไม่มีเอกสารที่ได้รับการอนุมัติจากคณะ", "info")
+
+        # ส่งข้อมูลไฟล์ไปยังเทมเพลต
+        return render_template('files_approved_faculty.html', files=approved_files)
+
+    except Exception as e:
+        flash(f"เกิดข้อผิดพลาดในการดึงข้อมูล: {str(e)}", "danger")
+        return redirect(url_for('admin_dashboard'))  # Redirect to dashboard in case of failure
+    
+@app.route('/approved_documents')
+def approved_documents():
+    # ตรวจสอบว่าเป็นผู้ดูแลมหาวิทยาลัยหรือไม่
+    if 'role' not in session or session['role'] != 'admin_university':
+        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
+        return redirect(url_for('admin_login'))  # หากไม่ใช่ผู้ดูแลมหาวิทยาลัย ให้ไปหน้า login
+
+    # ดึงเอกสารที่ได้รับการอนุมัติจากคณะ
+    try:
+        # ดึงเอกสารที่มีสถานะ 'อนุมัติจากคณะ'
+        approved_files = File.query.filter_by(status='อนุมัติจากคณะ').all()
+
+        if not approved_files:
+            flash("ยังไม่มีเอกสารที่ได้รับการอนุมัติจากคณะ", "info")
+
+        # ส่งข้อมูลไฟล์ที่ได้รับการอนุมัติไปยังเทมเพลต
+        return render_template('approved_documents.html', files=approved_files)
+
+    except Exception as e:
+        flash(f"เกิดข้อผิดพลาดในการดึงข้อมูล: {str(e)}", "danger")
+        return redirect(url_for('admin_dashboard'))  # Redirect to dashboard in case of failure
+
+
+
 
 
 

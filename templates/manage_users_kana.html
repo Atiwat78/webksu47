@@ -86,13 +86,7 @@
         โดยสามารถเพิ่ม, แก้ไข และกำหนดสิทธิ์การเข้าถึงของอาจารย์และบุคลากรภายในองค์กรได้
         เพื่อให้ระบบการบริหารจัดการข้อมูลเป็นไปอย่างถูกต้องและปลอดภัย
     </p>
-
-        <!-- ✅ ปุ่มเพิ่มยูสเซอร์ -->
-        <div class="text-center mb-4">
-            <a href="{{ url_for('add_user') }}" class="btn btn-success">
-                ➕ เพิ่มผู้ใช้ใหม่
-            </a>
-        </div>
+ 
 
         <div class="row">
             {% for user in users %}
@@ -101,6 +95,8 @@
                     <h5><i class="fas fa-user"></i> {{ user.username }}</h5>
                     <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
                     <p><i class="fas fa-circle" style="color: {% if user.status == 'active' %}green{% else %}red{% endif %};"></i> {{ user.status }}</p>
+
+                    <p><strong>บทบาท: </strong><span style="color: green;">{{ user.role }}</span></p>
                     
                     <div class="d-flex justify-content-between mt-3">
                         <!-- ✅ ปุ่มดูไฟล์ -->

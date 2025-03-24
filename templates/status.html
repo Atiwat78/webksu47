@@ -76,9 +76,10 @@
                                 <div class="accordion-body">
                                     <p><strong>ชื่อไฟล์:</strong> {{ file.filename }}</p>
                                     <p><strong>สถานะ:</strong> 
-                                        <span id="status-text-{{ file.id }}" class="{% if file.status == 'อนุมัติแล้ว' %}status-approved{% else %}status-pending{% endif %}">
+                                        <span id="status-{{ file.id }}" class="{% if file.status == 'อนุมัติแล้ว' %}status-approved{% elif file.status == 'รอตรวจสอบ' %}status-pending{% else %}status-rejected{% endif %}">
                                             {{ file.status }}
                                         </span>
+                                        
                                     </p>
                                     <p><strong>หมายเหตุจากแอดมิน:</strong></p>
                                     <p id="admin-comment-{{ file.id }}" class="text-danger">

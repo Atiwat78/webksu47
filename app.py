@@ -384,15 +384,24 @@ def approve_file(file_id):
     if not file:
         return jsonify({"status": "error", "message": "❌ ไม่พบไฟล์"}), 404
 
-    file.status = "ได้รับการอนุมัติจากคณะแล้ว"
-    db.session.commit()
+    # หากเป็นแอดมินคณะ
+    if session['role'] == 'admin':
+        file.status = "ได้รับการอนุมัติจากคณะแล้ว"
+        message = f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากคณะแล้ว"
+    # หากเป็นแอดมินมหาวิทยาลัย
+    elif session['role'] == 'admin_university':
+        file.status = "ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว"
+        message = f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว"
 
+    db.session.commit()  # บันทึกการเปลี่ยนแปลงในฐานข้อมูล
+    
     return jsonify({
         "status": "success",
-        "message": f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากคณะแล้ว",
+        "message": message,
         "file_id": file_id,
         "new_status": file.status
     })
+
 
 
 
@@ -715,7 +724,7 @@ def files_approved_faculty():
 
     # ดึงไฟล์ที่ได้รับการอนุมัติจากคณะ
     try:
-        approved_files = File.query.filter_by(status='อนุมัติจากคณะ').all()
+        approved_files = File.query.filter_by(status='ได้รับการอนุมัติจากคณะแล้ว').all()
         
         # ตรวจสอบว่าไฟล์ที่ดึงมาจากฐานข้อมูลมีข้อมูลหรือไม่
         if not approved_files:
@@ -728,28 +737,6 @@ def files_approved_faculty():
         flash(f"เกิดข้อผิดพลาดในการดึงข้อมูล: {str(e)}", "danger")
         return redirect(url_for('admin_dashboard'))  # Redirect to dashboard in case of failure
     
-@app.route('/approved_documents')
-def approved_documents():
-    # ตรวจสอบว่าเป็นผู้ดูแลมหาวิทยาลัยหรือไม่
-    if 'role' not in session or session['role'] != 'admin_university':
-        flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
-        return redirect(url_for('admin_login'))  # หากไม่ใช่ผู้ดูแลมหาวิทยาลัย ให้ไปหน้า login
-
-    # ดึงเอกสารที่ได้รับการอนุมัติจากคณะ
-    try:
-        # ดึงเอกสารที่มีสถานะ 'อนุมัติจากคณะ'
-        approved_files = File.query.filter_by(status='อนุมัติจากคณะ').all()
-
-        if not approved_files:
-            flash("ยังไม่มีเอกสารที่ได้รับการอนุมัติจากคณะ", "info")
-
-        # ส่งข้อมูลไฟล์ที่ได้รับการอนุมัติไปยังเทมเพลต
-        return render_template('approved_documents.html', files=approved_files)
-
-    except Exception as e:
-        flash(f"เกิดข้อผิดพลาดในการดึงข้อมูล: {str(e)}", "danger")
-        return redirect(url_for('admin_dashboard'))  # Redirect to dashboard in case of failure
-
 
 
 

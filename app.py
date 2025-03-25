@@ -730,12 +730,17 @@ def files_approved_faculty():
         if not approved_files:
             flash("ยังไม่มีเอกสารที่ได้รับการอนุมัติจากคณะ", "info")
 
-        # ส่งข้อมูลไฟล์ไปยังเทมเพลต
-        return render_template('files_approved_faculty.html', files=approved_files)
+        # ดึงข้อมูลผู้ใช้ที่เกี่ยวข้องกับไฟล์
+        users = {user.id: user.username for user in User.query.all()}  # สร้าง dictionary ที่เก็บ user_id และ username
+        
+        # ส่งข้อมูลไฟล์และผู้ใช้ไปยังเทมเพลต
+        return render_template('files_approved_faculty.html', files=approved_files, users=users)
 
     except Exception as e:
         flash(f"เกิดข้อผิดพลาดในการดึงข้อมูล: {str(e)}", "danger")
         return redirect(url_for('admin_dashboard'))  # Redirect to dashboard in case of failure
+
+
     
 
 

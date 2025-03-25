@@ -34,69 +34,77 @@
         }
 
         /* =====================
-           CSS สำหรับทำไทม์ไลน์
-        ===================== */
-        .timeline {
-          position: relative;
-          margin: 20px 0;
-          padding: 0;
-          list-style: none;
-        }
-        .timeline::after {
-          content: '';
-          position: absolute;
-          left: 30px;
-          top: 0;
-          bottom: 0;
-          width: 4px;
-          background: #D9D9D9;
-          border-radius: 2px;
-        }
-        .timeline-item {
-          position: relative;
-          margin-bottom: 40px;
-          padding-left: 60px;
-        }
-        .timeline-item::before {
-          content: '';
-          position: absolute;
-          left: 22px;
-          width: 16px;
-          height: 16px;
-          background-color: #007bff;
-          border: 3px solid #ffffff;
-          box-shadow: 0 0 0 2px #007bff;
-          border-radius: 50%;
-          top: 0;
-        }
-        .timeline-icon {
-          position: absolute;
-          left: 0;
-          top: -5px;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background-color: #ffffff;
-          border: 2px solid #007bff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #007bff;
-          font-size: 1.2rem;
-          z-index: 1;
-        }
-        .timeline-item.completed::before {
-          background-color: #28a745;
-          box-shadow: 0 0 0 2px #28a745;
-        }
-        .timeline-item.in-progress::before {
-          background-color: #ffc107;
-          box-shadow: 0 0 0 2px #ffc107;
-        }
-        .timeline-item.failed::before {
-          background-color: #dc3545;
-          box-shadow: 0 0 0 2px #dc3545;
-        }
+        CSS สำหรับทำไทม์ไลน์
+     ===================== */
+     .timeline {
+       position: relative;
+       margin: 20px 0;
+       padding: 0;
+       list-style: none;
+     }
+     
+     .timeline::after {
+       content: '';
+       position: absolute;
+       left: 50px; /* เพิ่มระยะห่างจากขอบซ้าย */
+       top: 0;
+       bottom: 0;
+       width: 4px;
+       background: #D9D9D9;
+       border-radius: 2px;
+     }
+     
+     .timeline-item {
+       position: relative;
+       margin-bottom: 60px; /* เพิ่มระยะห่างระหว่างรายการ */
+       padding-left: 80px; /* เพิ่มระยะห่างจากเส้นกลาง */
+     }
+     
+     .timeline-item::before {
+       content: '';
+       position: absolute;
+       left: 30px; /* เพิ่มระยะห่างจากเส้นกลาง */
+       width: 20px; /* ขยายขนาดวงกลม */
+       height: 20px; /* ขยายขนาดวงกลม */
+       background-color: #007bff;
+       border: 3px solid #ffffff;
+       box-shadow: 0 0 0 2px #007bff;
+       border-radius: 50%;
+       top: 0;
+     }
+     
+     .timeline-icon {
+       position: absolute;
+       left: 15px; /* ปรับตำแหน่งของไอคอน */
+       top: -10px;
+       width: 50px; /* ขยายขนาดวงกลม */
+       height: 50px; /* ขยายขนาดวงกลม */
+       border-radius: 50%;
+       background-color: #ffffff;
+       border: 2px solid #007bff;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       color: #007bff;
+       font-size: 1.5rem; /* ปรับขนาดไอคอนให้ใหญ่ขึ้น */
+       z-index: 1;
+     }
+     
+     .timeline-item.completed::before {
+       background-color: #28a745;
+       box-shadow: 0 0 0 2px #28a745;
+     }
+     
+     .timeline-item.in-progress::before {
+       background-color: #ffc107;
+       box-shadow: 0 0 0 2px #ffc107;
+     }
+     
+     .timeline-item.failed::before {
+       background-color: #dc3545;
+       box-shadow: 0 0 0 2px #dc3545;
+     }
+     
     </style>
 </head>
 <body>
@@ -139,38 +147,43 @@
                             <div id="collapse{{ file.id }}" class="accordion-collapse collapse {% if file.status == 'อนุมัติแล้ว' %}show{% endif %}" 
                                  aria-labelledby="heading{{ file.id }}" data-bs-parent="#fileStatusAccordion">
                                 
-                                <!-- ตรงนี้เปลี่ยนเป็น "ไทม์ไลน์" -->
+                                <!-- ไทม์ไลน์ -->
                                 <div class="accordion-body">
                                     <p><strong>ชื่อไฟล์:</strong> {{ file.filename }}</p>
                                     
                                     <ul class="timeline">
-                                        <!-- ตัวอย่าง 3 สถานะหลัก: อัปโหลด -> รอตรวจสอบ -> อนุมัติ/ไม่อนุมัติ -->
+                                        <!-- ไทม์ไลน์สำหรับสถานะ "อัปโหลดแล้ว" -->
                                         <li class="timeline-item completed">
                                             <div class="timeline-icon">
-                                                <i class="fas fa-upload"></i>
+                                                <i class="fa-solid fa-upload"></i>
                                             </div>
                                             <h5>อัปโหลดแล้ว</h5>
-                                            <div class="text-muted" style="font-size: 0.9rem;">{{ file.upload_date }}</div>
-                                            <p>ระบบได้รับไฟล์ของคุณเรียบร้อย</p>
+                                            <div class="text-muted" style="font-size: 0.9rem;">
+                                                {{ file.upload_date if file.upload_date else '---' }}
+                                            </div>
+                                            <p>ระบบได้รับไฟล์ของคุณเรียบร้อย </p>
                                         </li>
                                         
-                                        <li class="timeline-item 
-                                            {% if file.status == 'รอตรวจสอบ' %}in-progress
-                                               {% elif file.status in ['อนุมัติแล้ว','ไม่อนุมัติ'] %}completed
-                                               {% else %}in-progress
-                                            {% endif %}">
+                                        <!-- ไทม์ไลน์สำหรับสถานะ "รอตรวจสอบ" -->
+                                        {% if file.status == 'รอตรวจสอบ' %}
+                                        <li class="timeline-item in-progress">
                                             <div class="timeline-icon">
                                                 <i class="fas fa-spinner"></i>
                                             </div>
                                             <h5>รอตรวจสอบ</h5>
-                                            <div class="text-muted" style="font-size: 0.9rem;">{{ file.review_date if file.review_date else '---' }}</div>
+                                            <div class="text-muted" style="font-size: 0.9rem;">
+                                                {{ file.review_date if file.review_date else '---' }}
+                                            </div>
                                             <p>เจ้าหน้าที่กำลังตรวจสอบเอกสารของคุณ</p>
                                         </li>
-
+                                        {% endif %}
+                                    
+                                        <!-- ไทม์ไลน์สำหรับสถานะ "อนุมัติแล้ว" หรือ "ไม่อนุมัติ" -->
+                                        {% if file.status in ['อนุมัติแล้ว', 'ไม่อนุมัติ'] %}
                                         <li class="timeline-item
                                             {% if file.status == 'อนุมัติแล้ว' %}completed
-                                               {% elif file.status == 'ไม่อนุมัติ' %}failed
-                                               {% else %}in-progress
+                                            {% elif file.status == 'ไม่อนุมัติ' %}failed
+                                            {% else %}in-progress
                                             {% endif %}">
                                             <div class="timeline-icon">
                                                 <i class="fas 
@@ -181,12 +194,9 @@
                                                 </i>
                                             </div>
                                             <h5>
-                                                {% if file.status == 'อนุมัติแล้ว' %}
-                                                    อนุมัติแล้ว
-                                                {% elif file.status == 'ไม่อนุมัติ' %}
-                                                    ไม่อนุมัติ
-                                                {% else %}
-                                                    รอผลอนุมัติ
+                                                {% if file.status == 'อนุมัติแล้ว' %}อนุมัติแล้ว
+                                                {% elif file.status == 'ไม่อนุมัติ' %}ไม่อนุมัติ
+                                                {% else %}รอผลอนุมัติ
                                                 {% endif %}
                                             </h5>
                                             <div class="text-muted" style="font-size: 0.9rem;">
@@ -197,11 +207,12 @@
                                                 {% endif %}
                                             </div>
                                             <p><strong>หมายเหตุจากแอดมิน:</strong> 
-                                               {{ file.comment if file.comment else 'ไม่มีหมายเหตุ' }}
+                                                {{ file.comment if file.comment else 'ไม่มีหมายเหตุ' }}
                                             </p>
                                         </li>
+                                        {% endif %}
                                     </ul>
-
+                                    
                                     <!-- ปุ่มดูไฟล์ -->
                                     <a href="{{ url_for('uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-primary" target="_blank">
                                         <i class="fas fa-eye"></i> ดูไฟล์
@@ -215,7 +226,7 @@
                 {% endif %}
             </div>
         </div>
-    </div>
+        
     
     <script>
         function fetchStatusUpdates() {

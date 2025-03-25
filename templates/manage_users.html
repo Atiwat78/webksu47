@@ -60,14 +60,14 @@
     <!-- ✅ Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand ms-2" href="{{ url_for('admin_dashboard') }}">
+            <a class="navbar-brand ms-2" href="{{ url_for('university_dashboard') }}">
                 <img src="https://upload.wikimedia.org/wikipedia/th/4/4e/Kalasin_University_Seal.svg" 
                      alt="Kalasin University Logo" 
                      style="height: 50px; margin-right: 10px;">
                 <strong>Kalasin University - Admin</strong>
             </a>
             <div class="ms-auto d-flex">
-                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
+                <a href="{{ url_for('university_dashboard') }}" class="btn btn-primary fw-bold px-4 py-2 me-2">
                     <i class="fas fa-home"></i> หน้าหลัก
                 </a>
                 <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
@@ -110,10 +110,6 @@
                         <!-- ✅ ปุ่มดูไฟล์ -->
                         <a href="{{ url_for('view_user', user_id=user.id) }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-folder"></i> ไฟล์ที่อัปโหลด
-                        </a>
-                        <!-- ✅ ปุ่มแก้ไข -->
-                        <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-warning btn-sm">
-                            <i class="fas fa-edit"></i> แก้ไข
                         </a>
                         <!-- ✅ ปุ่มลบ -->
                         <button class="delete-btn" onclick="confirmDelete('{{ user.id }}', '{{ user.username }}')">

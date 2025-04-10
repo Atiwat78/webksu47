@@ -107,6 +107,13 @@
                 <button class="btn btn-danger btn-sm me-2" onclick="rejectFile({{ file.id }})" id="reject-btn-{{ file.id }}">
                     <i class="fas fa-times-circle"></i> ไม่อนุมัติ
                 </button>
+                {% if file.faculty_approve_date %}
+    <p>
+      <i class="fas fa-calendar-alt"></i>
+      วันที่คณะอนุมัติ: {{ file.faculty_approve_date.strftime('%d/%m/%Y %H:%M:%S') }}
+    </p>
+{% endif %}
+
             </div>
         </div>
         {% endfor %}

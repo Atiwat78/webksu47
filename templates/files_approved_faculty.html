@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ไฟล์ที่ได้รับการอนุมัติจากคณะ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #343a40;">
@@ -26,14 +27,14 @@
         <h2>เอกสารที่ได้รับการอนุมัติจากคณะ</h2>
 
         {% if files %}
-            <div class="row">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for file in files %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card">
+                    <div class="col">
+                        <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title"><i class="fas fa-file"></i> {{ file.filename }}</h5>
-                                <p><strong>ผู้ใช้:</strong> {{ users[file.user_id] }}</p> <!-- แสดงชื่อผู้ใช้ -->
-                                <p><strong>อีเมล:</strong> {{ users[file.user_id].email }}</p> <!-- แสดงอีเมลผู้ใช้ -->
+                                <p><strong>ผู้ใช้:</strong> {{ users[file.user_id] }}</p>
+                                <p><strong>อีเมล:</strong> {{ users[file.user_id].email }}</p>
                                 <p><strong>สถานะ:</strong> <span class="text-success">อนุมัติจากคณะ</span></p>
                                 <a href="{{ url_for('view_file', filename=file.filename) }}" class="btn btn-info btn-sm" target="_blank">
                                     <i class="fas fa-eye"></i> ดูไฟล์
@@ -56,15 +57,20 @@
 
     <script>
         function approveFile(fileId) {
+            console.log("approveFile clicked:", fileId); // debug log
             fetch(`/approve_file/${fileId}`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 alert(data.message);
                 location.reload();  // รีเฟรชหน้าหลังจากทำการอนุมัติ
+            })
+            .catch(error => {
+                console.error("Error:", error);
             });
         }
 
         function rejectFile(fileId) {
+            console.log("rejectFile clicked:", fileId); // debug log
             const comment = prompt("กรุณากรอกหมายเหตุสำหรับการไม่อนุมัติ:");
             if (!comment) return alert("⚠️ กรุณากรอกหมายเหตุ");
 
@@ -77,9 +83,11 @@
             .then(data => {
                 alert(data.message);
                 location.reload();  // รีเฟรชหน้าหลังจากทำการปฏิเสธ
+            })
+            .catch(error => {
+                console.error("Error:", error);
             });
         }
     </script>
-
 </body>
 </html>

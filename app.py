@@ -5,6 +5,8 @@ import os
 import csv
 from functools import wraps
 from models import DocumentRequest
+from datetime import datetime, timedelta
+
 
 
 
@@ -26,6 +28,7 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static/uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
+
 
 
 
@@ -67,6 +70,15 @@ class File(db.Model):
     status = db.Column(db.String(50), nullable=False, default="รอตรวจสอบ")
     comment = db.Column(db.Text, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+        # คีย์ต่างประเทศ (Foreign Key)
+   
+  
+    # ฟิลด์เวลาต่าง ๆ
+    upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    review_date = db.Column(db.DateTime, nullable=True)
+    approve_date = db.Column(db.DateTime, nullable=True)
+    
+
 
 
 class AcademicRequest(db.Model):
@@ -151,7 +163,7 @@ def register_user():
 
 
 
-# ✅ Route: Upload File
+#การอัพโหลดเอกสาร
 @app.route('/upload_profile', methods=['POST'])
 def upload_profile():
     if 'user_id' not in session:
@@ -160,15 +172,9 @@ def upload_profile():
 
     user = User.query.get(session['user_id'])
 
-    # ✅ รายชื่อฟิลด์ที่ต้องการดึงข้อมูล
     file_fields = [
-        "file_teaching",        # เอกสารประกอบการสอน (ผศ.)
-        "file_teaching_rsu",    # เอกสารประกอบคำสอน (รศ.)
-        "file_research",        # ผลงานทางวิชาการ
-        "file_mko03",           # มคอ.03
-        "file_pp1",             # แบบ ปพ.1
-        "file_evaluation",      # ผลการประเมินการสอน
-        "file_academic"         # รูปเล่มทางวิชาการ
+        "file_teaching", "file_teaching_rsu", "file_research",
+        "file_mko03", "file_pp1", "file_evaluation", "file_academic"
     ]
 
     files_uploaded = 0  # ตัวนับไฟล์ที่อัปโหลดสำเร็จ
@@ -180,12 +186,18 @@ def upload_profile():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-            new_file = File(filename=filename, file_path=file_path, user_id=user.id)
+            # ไม่ต้องระบุ upload_date เพราะจะถูกจัดการโดย SQLite
+            new_file = File(
+                filename=filename,
+                file_path=file_path,
+                user_id=user.id
+            )
+
             db.session.add(new_file)
             files_uploaded += 1
             print(f"✅ อัปโหลดไฟล์: {filename} ที่ {file_path}")
 
-    db.session.commit()
+    db.session.commit()  # บันทึกการเปลี่ยนแปลงในฐานข้อมูล
 
     if files_uploaded > 0:
         flash(f"✅ อัปโหลดไฟล์สำเร็จทั้งหมด {files_uploaded} รายการ!", "success")
@@ -193,7 +205,6 @@ def upload_profile():
         flash("❌ กรุณาเลือกไฟล์เพื่ออัปโหลด!", "danger")
 
     return redirect(url_for('profile'))
-
 
 
 
@@ -213,7 +224,7 @@ from flask import make_response, redirect, url_for, session, flash, render_templ
 @app.route('/manage_requests')
 def manage_requests():
     # ตรวจสอบว่า user เข้าสู่ระบบหรือยัง
-    if 'user_id' not in session or session.get('role') not in ['admin', 'faculty']:
+    if 'user_id' not in session or session.get('role') not in ['admin', 'admin_university']:
         flash("⚠️ กรุณาเข้าสู่ระบบก่อน!", "warning")
         return redirect(url_for('login'))  # ถ้าไม่ได้ login ให้กลับไปหน้า login
 
@@ -258,7 +269,7 @@ def delete_file(file_id):
 
 
 
-#อัพโหลดไฟล์
+#ตัวดาวโหลดไฟล์
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -373,10 +384,10 @@ def contact():
 
     return render_template('contact.html')
 
-# ✅ Route สำหรับอนุมัติไฟล์ของคณะ เเละเเสดงสถานะอ
+# ✅ Route สำหรับอนุมัติไฟล์ของคณะ เเละเเสดงสถานะ
 @app.route('/approve_file/<int:file_id>', methods=['POST'])
 def approve_file(file_id):
-    # ✅ ตรวจสอบสิทธิ์ โดยดูจาก session['role']
+    # ตรวจสอบสิทธิ์
     if 'role' not in session or session['role'] not in ['admin', 'admin_university']:
         return jsonify({"status": "error", "message": "❌ คุณไม่มีสิทธิ์อนุมัติไฟล์นี้"}), 403
 
@@ -387,21 +398,24 @@ def approve_file(file_id):
     # หากเป็นแอดมินคณะ
     if session['role'] == 'admin':
         file.status = "ได้รับการอนุมัติจากคณะแล้ว"
-        message = f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากคณะแล้ว"
+        file.review_date = datetime.now()  # บันทึกเวลาที่คณะอนุมัติ
+        message = f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากคณะแล้ว ณ {file.review_date.strftime('%d/%m/%Y %H:%M')}"
     # หากเป็นแอดมินมหาวิทยาลัย
     elif session['role'] == 'admin_university':
         file.status = "ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว"
-        message = f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว"
+        file.approve_date = datetime.now()  # บันทึกเวลาที่มหาวิทยาลัยอนุมัติ
+        message = f"✅ ไฟล์ {file.filename} ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว ณ {file.approve_date.strftime('%d/%m/%Y เวลา %H:%M')}"
 
     db.session.commit()  # บันทึกการเปลี่ยนแปลงในฐานข้อมูล
-    
+
     return jsonify({
         "status": "success",
         "message": message,
         "file_id": file_id,
         "new_status": file.status
     })
-
+    
+    
 
 
 
@@ -536,7 +550,9 @@ def admin_login():
 #ส่งข้อมูลของเเอดมิน
 @app.route('/admin_messages')
 def admin_messages():
-    return render_template('admin_messages.html')
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    return render_template('admin_messages.html', messages=messages)
+
 
 
 #ลบข้อมุลผู้ใช้
@@ -714,7 +730,7 @@ def manage_users_kana():
     # แสดงผลข้อมูลใน template
     return render_template('manage_users_kana.html', users=users)
 
-#คณะอนุมัติไปมหาลัย
+#อนุมัติมหาลัย
 @app.route('/files_approved_faculty')
 def files_approved_faculty():
     # ตรวจสอบว่าเป็นแอดมินมหาวิทยาลัยหรือไม่

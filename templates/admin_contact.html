@@ -74,9 +74,11 @@
                     {% for message in messages %}
                     <div class="message-item d-flex justify-content-between align-items-center">
                         <div>
-                            <strong><i class="fas fa-user"></i> {{ message.user_name }}</strong> 
-                            <span class="text-muted">({{ message.timestamp }})</span>
-                            <p class="m-0 text-truncate" style="max-width: 300px;">{{ message.text }}</p>
+                            <strong><i class="fas fa-user"></i> {{ message.name }} ({{ message.username }})</strong> 
+                            <span class="text-muted">({{ message.created_at.strftime('%d/%m/%Y %H:%M') }})</span>
+                            <p class="m-0" style="max-width: 300px;">{{ message.message }}</p>
+                            <!-- เพิ่มการแสดง Email ที่นี่ -->
+                            <p class="m-0"><strong>Email:</strong> {{ message.email }}</p>
                         </div>
                         <div>
                             <button class="btn btn-primary btn-custom" onclick="viewMessage({{ message.id }})">
@@ -89,9 +91,7 @@
                     </div>
                     {% endfor %}
                 </div>
-            </div>
-        </div>
-    </div>
+                
 
     <!-- Modal แสดงข้อความ -->
     <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">

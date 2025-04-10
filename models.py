@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Initialize the SQLAlchemy object
 db = SQLAlchemy()
@@ -18,19 +18,25 @@ class File(db.Model):
     file_path = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(50), nullable=False, default="รอตรวจสอบ")
     comment = db.Column(db.Text, nullable=True)
+
+    # คีย์ต่างประเทศ (Foreign Key)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    # เพิ่มคอลัมน์ upload_date เพื่อเก็บวันที่อัปโหลดไฟล์
+    
+    # ฟิลด์เวลาต่าง ๆ
     upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
-
+    review_date = db.Column(db.DateTime, nullable=True)
+    approve_date = db.Column(db.DateTime, nullable=True)
+    
+    # สร้างความสัมพันธ์กับตาราง User
+    # ถ้าจะใช้ back_populates ใน User model ให้ประกาศ user.relationship('File', back_populates='user')
+    # หรือถ้าจะใช้ backref ก็พอ แต่ไม่ต้องซ้ำกันทั้งสองฝั่ง
     user = db.relationship('User', back_populates='files')
-
-
 
 
 
 class ContactMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100))  # <-- เพิ่ม field นี้ถ้ายังไม่มี
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)

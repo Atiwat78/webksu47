@@ -6,6 +6,7 @@
     <title>สถานะเอกสาร</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="icon" href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" type="image/x-icon">
     
     <style>
         body {
@@ -33,78 +34,81 @@
             backdrop-filter: blur(10px);
         }
 
-        /* =====================
-        CSS สำหรับทำไทม์ไลน์
-     ===================== */
-     .timeline {
-       position: relative;
-       margin: 20px 0;
-       padding: 0;
-       list-style: none;
-     }
-     
-     .timeline::after {
-       content: '';
-       position: absolute;
-       left: 50px; /* เพิ่มระยะห่างจากขอบซ้าย */
-       top: 0;
-       bottom: 0;
-       width: 4px;
-       background: #D9D9D9;
-       border-radius: 2px;
-     }
-     
-     .timeline-item {
-       position: relative;
-       margin-bottom: 60px; /* เพิ่มระยะห่างระหว่างรายการ */
-       padding-left: 80px; /* เพิ่มระยะห่างจากเส้นกลาง */
-     }
-     
-     .timeline-item::before {
-       content: '';
-       position: absolute;
-       left: 30px; /* เพิ่มระยะห่างจากเส้นกลาง */
-       width: 20px; /* ขยายขนาดวงกลม */
-       height: 20px; /* ขยายขนาดวงกลม */
-       background-color: #007bff;
-       border: 3px solid #ffffff;
-       box-shadow: 0 0 0 2px #007bff;
-       border-radius: 50%;
-       top: 0;
-     }
-     
-     .timeline-icon {
-       position: absolute;
-       left: 15px; /* ปรับตำแหน่งของไอคอน */
-       top: -10px;
-       width: 50px; /* ขยายขนาดวงกลม */
-       height: 50px; /* ขยายขนาดวงกลม */
-       border-radius: 50%;
-       background-color: #ffffff;
-       border: 2px solid #007bff;
-       display: flex;
-       align-items: center;
-       justify-content: center;
-       color: #007bff;
-       font-size: 1.5rem; /* ปรับขนาดไอคอนให้ใหญ่ขึ้น */
-       z-index: 1;
-     }
-     
-     .timeline-item.completed::before {
-       background-color: #28a745;
-       box-shadow: 0 0 0 2px #28a745;
-     }
-     
-     .timeline-item.in-progress::before {
-       background-color: #ffc107;
-       box-shadow: 0 0 0 2px #ffc107;
-     }
-     
-     .timeline-item.failed::before {
-       background-color: #dc3545;
-       box-shadow: 0 0 0 2px #dc3545;
-     }
-     
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #D9D9D9;
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 60px;
+            padding-left: 80px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            width: 20px;
+            height: 20px;
+            background-color: #007bff;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 0 2px #007bff;
+            border-radius: 50%;
+            top: 0;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 15px;
+            top: -10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            border: 2px solid #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007bff;
+            font-size: 1.5rem;
+            z-index: 1;
+        }
+
+        .timeline-item.completed::before {
+            background-color: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+        }
+
+        .timeline-item.in-progress::before {
+            background-color: #ffc107;
+            box-shadow: 0 0 0 2px #ffc107;
+        }
+
+        .timeline-item.failed::before {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 2px #dc3545;
+        }
+        button:focus,
+        button:active,
+        .btn:focus,
+        .btn:active {
+        outline: none !important;
+        box-shadow: none !important;
+    }
     </style>
 </head>
 <body>
@@ -127,7 +131,7 @@
 
     <div class="container container-custom mt-5">
         <h2>📄 สถานะเอกสารของคุณ</h2>
-    
+
         <div id="fileStatusContainer">
             <div class="accordion mt-3" id="fileStatusAccordion">
                 {% if files %}
@@ -146,78 +150,94 @@
                             </h2>
                             <div id="collapse{{ file.id }}" class="accordion-collapse collapse {% if file.status == 'อนุมัติแล้ว' %}show{% endif %}" 
                                  aria-labelledby="heading{{ file.id }}" data-bs-parent="#fileStatusAccordion">
-                                
+
                                 <!-- ไทม์ไลน์ -->
                                 <div class="accordion-body">
                                     <p><strong>ชื่อไฟล์:</strong> {{ file.filename }}</p>
                                     
-                                    <ul class="timeline">
-                                        <!-- ไทม์ไลน์สำหรับสถานะ "อัปโหลดแล้ว" -->
-                                        <li class="timeline-item completed">
-                                            <div class="timeline-icon">
-                                                <i class="fa-solid fa-upload"></i>
-                                            </div>
-                                            <h5>อัปโหลดแล้ว</h5>
-                                            <div class="text-muted" style="font-size: 0.9rem;">
-                                                {{ file.upload_date if file.upload_date else '---' }}
-                                            </div>
-                                            <p>ระบบได้รับไฟล์ของคุณเรียบร้อย </p>
-                                        </li>
-                                        
-                                        <!-- ไทม์ไลน์สำหรับสถานะ "รอตรวจสอบ" -->
-                                        {% if file.status == 'รอตรวจสอบ' %}
-                                        <li class="timeline-item in-progress">
-                                            <div class="timeline-icon">
-                                                <i class="fas fa-spinner"></i>
-                                            </div>
-                                            <h5>รอตรวจสอบ</h5>
-                                            <div class="text-muted" style="font-size: 0.9rem;">
-                                                {{ file.review_date if file.review_date else '---' }}
-                                            </div>
-                                            <p>เจ้าหน้าที่กำลังตรวจสอบเอกสารของคุณ</p>
-                                        </li>
-                                        {% endif %}
+                                    <!-- (1) ปุ่ม "ดูรายละเอียด"  -->
+                                    <button class="btn btn-info btn-sm mb-2" 
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#detail_{{ file.id }}"
+                                            aria-expanded="false"
+                                            aria-controls="detail_{{ file.id }}">
+                                        ดูรายละเอียด
+                                    </button>
                                     
-                                        <!-- ไทม์ไลน์สำหรับสถานะ "อนุมัติแล้ว" หรือ "ไม่อนุมัติ" -->
-                                        {% if file.status in ['อนุมัติแล้ว', 'ไม่อนุมัติ'] %}
-                                        <li class="timeline-item
-                                            {% if file.status == 'อนุมัติแล้ว' %}completed
-                                            {% elif file.status == 'ไม่อนุมัติ' %}failed
-                                            {% else %}in-progress
-                                            {% endif %}">
-                                            <div class="timeline-icon">
-                                                <i class="fas 
-                                                    {% if file.status == 'อนุมัติแล้ว' %}fa-check
-                                                    {% elif file.status == 'ไม่อนุมัติ' %}fa-times
-                                                    {% else %}fa-hourglass-half
-                                                    {% endif %}">
-                                                </i>
-                                            </div>
-                                            <h5>
-                                                {% if file.status == 'อนุมัติแล้ว' %}อนุมัติแล้ว
-                                                {% elif file.status == 'ไม่อนุมัติ' %}ไม่อนุมัติ
-                                                {% else %}รอผลอนุมัติ
-                                                {% endif %}
-                                            </h5>
-                                            <div class="text-muted" style="font-size: 0.9rem;">
-                                                {% if file.status in ['อนุมัติแล้ว','ไม่อนุมัติ'] %}
-                                                    {{ file.approve_date if file.approve_date else '---' }}
-                                                {% else %}
-                                                    ---
-                                                {% endif %}
-                                            </div>
-                                            <p><strong>หมายเหตุจากแอดมิน:</strong> 
-                                                {{ file.comment if file.comment else 'ไม่มีหมายเหตุ' }}
-                                            </p>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
+                                    <!-- (2) ส่วนข้อมูลที่จะซ่อน/แสดง -->
+                                    <div id="detail_{{ file.id }}" class="collapse">
+                                        <ul class="timeline">
+                                            <!-- ขั้นตอนที่ 1: อัปโหลดเอกสาร -->
+                                            <li class="timeline-item completed">
+                                                <div class="timeline-icon">
+                                                    <i class="fa-solid fa-upload"></i>
+                                                </div>
+                                                <h5>อัปโหลดเอกสารแล้ว</h5>
+                                                <span class="text-muted">
+                                                    {{ file.upload_date.strftime('%d/%m/%Y') }} เวลา {{ file.upload_date.strftime('%H:%M:%S') }}
+                                                </span>
+                                                <p>ระบบได้รับเอกสารของคุณแล้ว</p>
+                                            </li>
+                                            
+                                            <!-- ขั้นตอนที่ 2: คณะอนุมัติ -->
+                                            <li class="timeline-item {% if file.review_date %}completed{% else %}in-progress{% endif %}">
+                                                <div class="timeline-icon">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </div>
+                                                <h5>คณะอนุมัติ</h5>
+                                                <span class="text-muted">
+                                                    {% if file.review_date %}
+                                                        {{ file.review_date.strftime('%d/%m/%Y') }} เวลา {{ file.review_date.strftime('%H:%M:%S') }}
+                                                    {% else %}
+                                                        รอการอนุมัติ
+                                                    {% endif %}
+                                                </span>
+                                                <p>
+                                                    {% if file.review_date %}
+                                                        เอกสารถูกอนุมัติโดยคณะ
+                                                    {% else %}
+                                                        รอการตรวจสอบจากคณะ
+                                                    {% endif %}
+                                                </p>
+                                            </li>
+                                            
+                                            <!-- ขั้นตอนที่ 3: มหาวิทยาลัยอนุมัติ -->
+                                            <li class="timeline-item {% if file.approve_date %}{% if file.status == 'อนุมัติแล้ว' %}completed{% elif file.status == 'ไม่อนุมัติ' %}failed{% endif %}{% else %}in-progress{% endif %}">
+                                                <div class="timeline-icon">
+                                                    <i class="fa-solid fa-university"></i>
+                                                </div>
+                                                <h5>มหาวิทยาลัยอนุมัติ</h5>
+                                                <span class="text-muted">
+                                                    {% if file.approve_date %}
+                                                        {{ file.approve_date.strftime('%d/%m/%Y') }} เวลา {{ file.approve_date.strftime('%H:%M:%S') }}
+                                                    {% else %}
+                                                        รอการอนุมัติ
+                                                    {% endif %}
+                                                </span>
+                                                <p>
+                                                    {% if file.approve_date %}
+                                                        {% if file.status  %}
+                                                            เอกสารถูกอนุมัติโดยมหาวิทยาลัย
+                                                        {% elif file.status%}
+                                                            เอกสารถูกปฏิเสธ
+                                                        {% endif %}
+                                                    {% else %}
+                                                        รอการตรวจสอบจากมหาวิทยาลัย
+                                                    {% endif %}
+                                                </p>
+                                            </li>
+                                        </ul>
+                                    </div>
                                     
-                                    <!-- ปุ่มดูไฟล์ -->
-                                    <a href="{{ url_for('uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-primary" target="_blank">
+                                    
+                                    <!-- ปุ่มดูไฟล์เดิม -->
+                                    <a href="{{ url_for('uploaded_file', filename=file.filename) }}" 
+                                       class="btn btn-sm btn-primary" target="_blank">
                                         <i class="fas fa-eye"></i> ดูไฟล์
                                     </a>
                                 </div>
+                                
                             </div>
                         </div>
                     {% endfor %}
@@ -226,40 +246,9 @@
                 {% endif %}
             </div>
         </div>
-        
-    
-    <script>
-        function fetchStatusUpdates() {
-            fetch("{{ url_for('status') }}")
-                .then(response => response.text())
-                .then(html => {
-                    document.querySelector('#fileStatusContainer').innerHTML = 
-                        new DOMParser().parseFromString(html, 'text/html').querySelector('#fileStatusContainer').innerHTML;
-                })
-                .catch(error => console.error('Error:', error));
-        }
 
-        setInterval(fetchStatusUpdates, 100000); // อัปเดตสถานะทุก 1 นาที
-
-        function logout() {
-            // เปลี่ยนเส้นทางไปที่หน้า logout
-            window.location.href = "{{ url_for('logout') }}";
-
-            // เคลียร์ session history และเปลี่ยนเส้นทางไปที่หน้า login
-            setTimeout(function () {
-                window.location.replace("{{ url_for('login') }}");
-            }, 100);
-        }
-
-        // ป้องกันการย้อนกลับหลังจากออกจากระบบ
-        (function () {
-            window.history.pushState(null, "", window.location.href);
-            window.onpopstate = function () {
-                window.history.pushState(null, "", window.location.href);
-            };
-        })();
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>  
 </html>

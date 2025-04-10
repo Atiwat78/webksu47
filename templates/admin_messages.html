@@ -85,7 +85,12 @@
             {% for message in messages %}
                 <div class="message-box">
                     <div>
-                        <h5><i class="fas fa-user"></i> {{ message.name }}</h5>
+                        <strong><i class="fas fa-user"></i> {{ message.name }}
+                            {% if message.username %}
+                                ({{ message.username }})
+                            {% endif %}
+                            </strong>
+                            
                         <p><i class="fas fa-envelope"></i> {{ message.email }}</p>
                         <p><i class="fas fa-comment"></i> {{ message.message }}</p>
                         <p class="text-muted"><i class="fas fa-clock"></i> {{ message.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>

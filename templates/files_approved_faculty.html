@@ -82,8 +82,9 @@
                         <div class="file-card">
                             <div class="card-body">
                                 <h5 class="card-title"><i class="fas fa-file"></i> {{ file.filename }}</h5>
-                                <p><strong>ผู้ใช้:</strong> {{ users[file.user_id] }}</p>
-                                <p><strong>อีเมล:</strong> {{ users[file.user_id].email }}</p>
+                                <p><strong>ผู้ใช้:</strong> {{ file.user.username }}</p>
+                                <p><strong>อีเมล:</strong> {{ file.user.email }}</p>
+
                                 <p><strong>สถานะ:</strong> <span class="text-success">อนุมัติจากคณะ</span></p>
                                 <a href="{{ url_for('view_file', filename=file.filename) }}" class="btn btn-info btn-sm" target="_blank">
                                     <i class="fas fa-eye"></i> ดูไฟล์

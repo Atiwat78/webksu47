@@ -14,6 +14,18 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 
+@app.template_filter('faculty_th')
+def faculty_th(code):
+    mapping = {
+        'engineering': 'วิศวกรรมศาสตร์',
+        'science':     'วิทยาศาสตร์',
+        'education':   'ครุศาสตร์',
+        'nursing':     'พยาบาลศาสตร์',
+        'law':         'นิติศาสตร์',
+        'arts':        'ศิลปศาสตร์'
+    }
+    return mapping.get(code, code or "ไม่ระบุคณะ")
+
 # ✅ ตั้งค่า SQLite Database
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'data.db')
@@ -215,6 +227,48 @@ def upload_profile():
         flash("❌ กรุณาเลือกไฟล์เพื่ออัปโหลด!", "danger")
 
     return redirect(url_for('profile'))
+
+
+#สำหรับการเเก้ไขไฟล์เเละอัพโหลดไฟล์ใหม่
+@app.route('/reupload_file/<int:file_id>', methods=['POST'])
+def reupload_file(file_id):
+    if 'user_id' not in session:
+        flash("❌ กรุณาเข้าสู่ระบบก่อน", "danger")
+        return redirect(url_for('login'))
+
+    file = File.query.get_or_404(file_id)
+
+    # ยืนยันว่าเป็นไฟล์ของเจ้าของ
+    if file.user_id != session['user_id']:
+        flash("❌ คุณไม่มีสิทธิ์แก้ไขไฟล์นี้", "danger")
+        return redirect(url_for('status'))
+
+    new_file = request.files.get('new_file')
+    if not new_file or not allowed_file(new_file.filename):
+        flash("⚠️ กรุณาเลือกไฟล์รูปแบบ .pdf / .doc / .docx", "warning")
+        return redirect(url_for('status'))
+
+    # ลบไฟล์เก่าออกจากดิสก์ (ถ้ามีอยู่)
+    if os.path.exists(file.file_path):
+        os.remove(file.file_path)
+
+    # เซฟไฟล์ใหม่
+    filename     = secure_filename(new_file.filename)
+    save_path    = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    new_file.save(save_path)
+
+    # อัปเดต record เดิม
+    file.filename   = filename
+    file.file_path  = save_path
+    file.status     = "รอตรวจสอบ"
+    file.comment    = None           # เคลียร์หมายเหตุเก่า
+    file.review_date = None
+    file.approve_date = None
+    db.session.commit()
+
+    flash("✅ ส่งไฟล์ใหม่เรียบร้อย! กรุณารอการตรวจสอบอีกครั้ง", "success")
+    return redirect(url_for('status'))
+
 
 
 
@@ -793,21 +847,6 @@ def manage_users_kana():
     # แสดงผลข้อมูลใน template
     return render_template('manage_users_kana.html', users=users)
 
-# --------------------------  Jinja filter  --------------------------
-@app.template_filter('faculty_th')
-def faculty_th(code):
-    """แปลงรหัสคณะ (english code) → ชื่อภาษาไทย"""
-    mapping = {
-        'engineering': 'วิศวกรรมศาสตร์',
-        'science':     'วิทยาศาสตร์',
-        'education':   'ครุศาสตร์',
-        'nursing':     'พยาบาลศาสตร์',
-        'law':         'นิติศาสตร์',
-        'arts':        'ศิลปศาสตร์'
-    }
-    # ถ้า code ไม่มี หรือหาไม่เจอ → คืนค่าเดิม / 'ไม่ระบุคณะ'
-    return mapping.get(code, code or "ไม่ระบุคณะ")
-# --------------------------------------------------------------------
 
 
 #อนุมัติมหาลัย

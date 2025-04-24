@@ -168,6 +168,7 @@
                                     <!-- (2) ส่วนข้อมูลที่จะซ่อน/แสดง -->
                                     <div id="detail_{{ file.id }}" class="collapse">
                                         <ul class="timeline">
+                                            
                                             <!-- ขั้นตอนที่ 1: อัปโหลดเอกสาร -->
                                             <li class="timeline-item completed">
                                                 <div class="timeline-icon">
@@ -229,6 +230,28 @@
                                             </li>
                                         </ul>
                                     </div>
+                                    {% if file.status == 'ไม่อนุมัติ' and file.comment %}
+                                    <div class="alert alert-danger mt-3">
+                                    <i class="fas fa-comment-dots"></i>
+                                    <strong>หมายเหตุ:</strong> {{ file.comment }}
+                                    </div>
+                                    {% endif %}
+                                    {% if file.status == 'ไม่อนุมัติ' %}
+    <form action="{{ url_for('reupload_file', file_id=file.id) }}" method="POST"
+          enctype="multipart/form-data" class="mt-2 d-flex gap-2 align-items-end">
+
+        <div class="flex-grow-1">
+            <label class="form-label mb-1">อัปโหลดไฟล์ใหม่:</label>
+            <input type="file" name="new_file" class="form-control form-control-sm" required>
+        </div>
+
+        <button type="submit" class="btn btn-sm btn-success">
+            <i class="fas fa-upload"></i> ส่งใหม่
+        </button>
+    </form>
+{% endif %}
+
+
                                     
                                     
                                     <!-- ปุ่มดูไฟล์เดิม -->

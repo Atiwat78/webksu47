@@ -123,35 +123,46 @@
     </div>
 
     <script>
+        /* ✅ อนุมัติ */
         function approveFile(fileId) {
-            fetch(`/approve_file/${fileId}`, { method: 'POST' })
-            .then(response => response.json())
+            const comment = document.getElementById(`comment-${fileId}`).value;
+    
+            fetch(`/approve_file/${fileId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: comment })   // ⬅️ ส่งเหตุผล (ถ้ามี)
+            })
+            .then(r => r.json())
             .then(data => {
                 alert(data.message);
-                document.getElementById(`status-${fileId}`).innerHTML = `<span class="status-approved">อนุมัติแล้ว</span>`;
+                document.getElementById(`status-${fileId}`).innerHTML =
+                    '<span class="status-approved">อนุมัติแล้ว</span>';
                 document.getElementById(`approve-btn-${fileId}`).remove();
                 document.getElementById(`reject-btn-${fileId}`).remove();
             });
         }
-
+    
+        /* ✅ ไม่อนุมัติ */
         function rejectFile(fileId) {
-            const comment = document.getElementById(`comment-${fileId}`).value;
-            if (!comment.trim()) return alert("⚠️ กรุณากรอกหมายเหตุ");
-
+            const comment = document.getElementById(`comment-${fileId}`).value.trim();
+            if (!comment) return alert("⚠️ กรุณากรอกหมายเหตุ");
+    
             fetch(`/reject_file/${fileId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ comment: comment })
+                body: JSON.stringify({ comment: comment })   // ⬅️ ส่งเหตุผล
             })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
                 alert(data.message);
-                document.getElementById(`status-${fileId}`).innerHTML = `<span class="status-rejected">ไม่อนุมัติ</span>`;
+                document.getElementById(`status-${fileId}`).innerHTML =
+                    '<span class="status-rejected">ไม่อนุมัติ</span>';
                 document.getElementById(`approve-btn-${fileId}`).remove();
                 document.getElementById(`reject-btn-${fileId}`).remove();
             });
         }
     </script>
+    
 
 </body>
 </html>

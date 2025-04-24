@@ -97,6 +97,11 @@
                     <p><i class="fas fa-circle" style="color: {% if user.status == 'active' %}green{% else %}red{% endif %};"></i> {{ user.status }}</p>
 
                     <p><strong>บทบาท: </strong><span style="color: green;">{{ user.role }}</span></p>
+                    <p>
+                        <strong>คณะ: </strong>
+                        <span style="color:#007bff;">{{ user.faculty|faculty_th }}</span>
+                      </p>
+                      
                     
                     <div class="d-flex justify-content-between mt-3">
                         <!-- ✅ ปุ่มดูไฟล์ -->

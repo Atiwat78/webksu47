@@ -106,8 +106,14 @@
         <div class="card text-center">
             <h1><i class="fas fa-user-circle"></i> โปรไฟล์ของคุณ</h1>
             <p><i class="fas fa-user"></i> ชื่อผู้ใช้: <strong>{{ username }}</strong></p>
+            <p>
+                <i class="fas fa-building-columns"></i>
+                คณะ: <strong style="">{{ faculty }}</strong>
+              </p>
+              
             <p><i class="fas fa-envelope"></i> อีเมล: <strong>{{ email }}</strong></p> <!-- ✅ เพิ่มอีเมล -->
             <p><i class="fas fa-user-tag"></i> บทบาท: <strong>{{ role }}</strong></p>
+
             
             <form id="uploadForm" action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">

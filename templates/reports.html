@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายงานและสถิติ</title>
@@ -26,10 +27,14 @@
     
     <div class="container mt-5">
         <h2 class="text-center mb-4">📊 รายงานและสถิติการใช้งาน</h2>
+        
+        <!-- แถวแรก -->
         <div class="row g-4 justify-content-center">
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card text-white bg-primary text-center">
-                    <div class="card-header">👥 จำนวนผู้ใช้ทั้งหมด</div>
+                    <div class="card-header">
+                        <i class="fas fa-users me-2"></i> จำนวนผู้ใช้ทั้งหมด
+                    </div>
                     <div class="card-body">
                         <h3 class="card-title">{{ total_users }}</h3>
                     </div>
@@ -37,34 +42,67 @@
             </div>
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card text-white bg-success text-center">
-                    <div class="card-header">📂 ไฟล์ที่ถูกอัปโหลด</div>
+                    <div class="card-header">
+                        <i class="fas fa-folder me-2"></i> ไฟล์ที่ถูกอัปโหลด
+                    </div>
                     <div class="card-body">
                         <h3 class="card-title">{{ total_files }}</h3>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="card text-white bg-warning text-center">
-                    <div class="card-header">✅ ไฟล์ที่อนุมัติ</div>
-                    <div class="card-body">
-                        <h3 class="card-title">{{ approved_files }}</h3>
-                    </div>
-                </div>
-            </div>
+            
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card text-white bg-danger text-center">
-                    <div class="card-header">⏳ ไฟล์ที่รออนุมัติ</div>
+                    <div class="card-header">
+                        <i class="fas fa-hourglass-half me-2"></i> รอตรวจสอบ
+                    </div>
                     <div class="card-body">
                         <h3 class="card-title">{{ pending_files }}</h3>
                     </div>
                 </div>
             </div>
         </div>
+    
+        <!-- แถวที่สอง -->
+        <!-- แถวที่สอง (อัปเดตให้ขนาดเท่ากัน) -->
+<div class="row g-4 justify-content-center mt-2">
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="card text-white bg-info text-center">
+            <div class="card-header">
+                <i class="fas fa-check-circle me-2"></i> ไฟล์ที่อนุมัติจากคณะ
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ approved_by_faculty }}</h3>
+            </div>
+        </div>
     </div>
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="card text-white bg-secondary text-center">
+            <div class="card-header">
+                <i class="fas fa-check-circle me-2"></i> ไฟล์ที่อนุมัติจากมหาวิทยาลัย
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ approved_by_university }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3">
+        <div class="card text-white bg-dark text-center">
+            <div class="card-header">
+                <i class="fas fa-hourglass-half me-2"></i> ไฟล์ที่รอการอนุมัติ
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ waiting_files }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
 
     <script>
         function logoutAndRedirect() {
-            // เช็คว่าเป็นแอดมินหรือไม่ แล้วเด้งไปที่หน้าล็อกอินของแอดมิน
             let isAdmin = "{{ session.get('role') }}" === "admin";
             let redirectUrl = isAdmin ? "{{ url_for('admin_login') }}" : "{{ url_for('login') }}";
             

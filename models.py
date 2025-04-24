@@ -7,10 +7,13 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
-    role = db.Column(db.String(50), nullable=False)  # เช่น admin, user
+    role = db.Column(db.String(50), nullable=False)
+    faculty = db.Column(db.String(100), nullable=True)
     
-    # Define the relationship with DocumentRequest
+    # ความสัมพันธ์กับเอกสารและไฟล์
     document_requests = db.relationship('DocumentRequest', back_populates='user', lazy=True)
+    files = db.relationship('File', back_populates='user', lazy=True)  # ✅ เพิ่มตรงนี้
+
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)

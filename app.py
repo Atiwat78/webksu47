@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 import os
 import csv
 from functools import wraps
-from models import DocumentRequest
+from models import User, DocumentRequest, File
 from datetime import datetime, timedelta
 
 
@@ -54,6 +54,8 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(10), nullable=False, default='user')
     files = db.relationship('File', backref='user', lazy=True)
+    faculty = db.Column(db.String(100), nullable=True)
+   
 
 
 class ContactMessage(db.Model):
@@ -132,16 +134,17 @@ def login():
 def register_user():
     if request.method == 'POST':
         username = request.form['username']
-        email = request.form['email']  # ✅ รับค่า email
+        email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+        faculty = request.form['faculty']  # ✅ รับค่าคณะ
 
         if password != confirm_password:
             flash("❌ รหัสผ่านไม่ตรงกัน!", "danger")
             return redirect(url_for('register_user'))
 
         existing_user = User.query.filter_by(username=username).first()
-        existing_email = User.query.filter_by(email=email).first()  # ✅ เช็คอีเมลซ้ำ
+        existing_email = User.query.filter_by(email=email).first()
 
         if existing_user:
             flash("❌ ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว", "danger")
@@ -151,7 +154,13 @@ def register_user():
             flash("❌ อีเมลนี้ถูกใช้ไปแล้ว", "danger")
             return redirect(url_for('register_user'))
 
-        new_user = User(username=username, email=email, password=password, role="user")  # ✅ บันทึก email
+        new_user = User(
+            username=username,
+            email=email,
+            password=password,
+            faculty=faculty,  # ✅ บันทึกคณะ
+            role="user"
+        )
         db.session.add(new_user)
         db.session.commit()
 
@@ -159,6 +168,7 @@ def register_user():
         return redirect(url_for('login'))
 
     return render_template('register_user.html')
+
 
 
 
@@ -208,15 +218,34 @@ def upload_profile():
 
 
 
-# ✅ Route: Profile
 @app.route('/profile')
 def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    user = User.query.get(session['user_id'])
+    user  = User.query.get(session['user_id'])
     files = File.query.filter_by(user_id=user.id).all()
-    return render_template('profile.html', username=user.username, email=user.email, role=user.role, files=files)
+
+    # ↘️  ตารางแปลคณะ
+    th = {
+        'engineering': 'วิศวกรรมศาสตร์',
+        'science':     'วิทยาศาสตร์',
+        'education':   'ครุศาสตร์',
+        'nursing':     'พยาบาลศาสตร์',
+        'law':         'นิติศาสตร์',
+        'arts':        'ศิลปศาสตร์'
+    }
+
+    return render_template(
+        'profile.html',
+        username=user.username,
+        email   =user.email,
+        role    =user.role,
+        faculty =th.get(user.faculty, user.faculty),   # ส่งชื่อไทย
+        files   =files
+    )
+
+
 
 # ✅ Route: Manage Requests
 from flask import make_response, redirect, url_for, session, flash, render_template
@@ -292,8 +321,9 @@ def mark_as_read(message_id):
 
 
 
-#เข้าสู่ระบบสมาชิก
+# เข้าสู่ระบบสมาชิก
 from flask import make_response
+
 @app.route('/user_dashboard')
 def user_dashboard():
     if 'user_id' not in session or session.get('role') != 'user':
@@ -302,13 +332,32 @@ def user_dashboard():
     user = User.query.get(session['user_id'])
     files = File.query.filter_by(user_id=user.id).all()
 
-    # สร้าง Response และปิดการ Cache เพื่อไม่ให้กด Back แล้วย้อนกลับมาได้
-    response = make_response(render_template('user_dashboard.html', username=user.username, files=files))
+    # 🧠 Map ชื่อคณะให้แสดงเป็นภาษาไทย
+    faculty_map = {
+        'engineering': 'วิศวกรรมศาสตร์',
+        'science': 'วิทยาศาสตร์',
+        'education': 'ครุศาสตร์',
+        'nursing': 'พยาบาลศาสตร์',
+        'law': 'นิติศาสตร์',
+        'arts': 'ศิลปศาสตร์'
+    }
+    faculty_name = faculty_map.get(user.faculty, user.faculty or "ไม่ระบุคณะ")
+
+    # 🔁 ส่ง faculty ไปยัง template ด้วย
+    response = make_response(render_template(
+        'user_dashboard.html',
+        username=user.username,
+        files=files,
+        faculty=faculty_name
+    ))
+
+    # ปิดการ Cache เพื่อไม่ให้ย้อนกลับหน้าเก่า
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
-    
+
     return response
+
 
 #สถานะรอตรวจสอบไฟล์
 @app.route('/status')
@@ -686,22 +735,36 @@ def settings():
 
 @app.route('/reports')
 def reports():
-    # เดิมคุณมีเช็คแบบนี้
-    if 'admin' not in session:  # หรือ if not session.get('admin'):
+    if 'admin' not in session:
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
         return redirect(url_for('admin_login'))
 
-    # ผ่านเงื่อนไขแล้วดึงข้อมูลสถิติ
     total_users = User.query.count()
     total_files = File.query.count()
     approved_files = File.query.filter_by(status="อนุมัติแล้ว").count()
     pending_files = File.query.filter_by(status="รออนุมัติ").count()
 
-    return render_template('reports.html',
-                           total_users=total_users,
-                           total_files=total_files,
-                           approved_files=approved_files,
-                           pending_files=pending_files)
+    # ดึงแยกตามแหล่งที่อนุมัติ
+    approved_by_faculty = File.query.filter_by(status="ได้รับการอนุมัติจากคณะแล้ว").count()
+    approved_by_university = File.query.filter_by(status="ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว").count()
+
+    # ไฟล์ที่ยังรอการอนุมัติ (หลายสถานะ)
+    waiting_files = File.query.filter(File.status.in_([
+        "รอตรวจสอบ", "รอคณะอนุมัติ", "รอมหาวิทยาลัยอนุมัติ", "รอตรวจสอบ"
+    ])).count()
+
+    return render_template(
+        'reports.html',
+        total_users=total_users,
+        total_files=total_files,
+        approved_files=approved_files,
+        pending_files=pending_files,
+        approved_by_faculty=approved_by_faculty,
+        approved_by_university=approved_by_university,
+        waiting_files=waiting_files
+    )
+
+
 
                            
 
@@ -729,6 +792,23 @@ def manage_users_kana():
 
     # แสดงผลข้อมูลใน template
     return render_template('manage_users_kana.html', users=users)
+
+# --------------------------  Jinja filter  --------------------------
+@app.template_filter('faculty_th')
+def faculty_th(code):
+    """แปลงรหัสคณะ (english code) → ชื่อภาษาไทย"""
+    mapping = {
+        'engineering': 'วิศวกรรมศาสตร์',
+        'science':     'วิทยาศาสตร์',
+        'education':   'ครุศาสตร์',
+        'nursing':     'พยาบาลศาสตร์',
+        'law':         'นิติศาสตร์',
+        'arts':        'ศิลปศาสตร์'
+    }
+    # ถ้า code ไม่มี หรือหาไม่เจอ → คืนค่าเดิม / 'ไม่ระบุคณะ'
+    return mapping.get(code, code or "ไม่ระบุคณะ")
+# --------------------------------------------------------------------
+
 
 #อนุมัติมหาลัย
 @app.route('/files_approved_faculty')

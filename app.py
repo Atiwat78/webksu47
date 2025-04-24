@@ -852,28 +852,41 @@ def manage_users_kana():
 #อนุมัติมหาลัย
 @app.route('/files_approved_faculty')
 def files_approved_faculty():
-    # ตรวจสอบว่าเป็นแอดมินมหาวิทยาลัยหรือไม่
     if 'role' not in session or session['role'] != 'admin_university':
         flash("❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้!", "danger")
-        return redirect(url_for('admin_login'))  # หากไม่ใช่ผู้ดูแลมหาวิทยาลัย ให้ไปหน้า login
+        return redirect(url_for('admin_login'))
 
-    # ดึงไฟล์ที่ได้รับการอนุมัติจากคณะ
-    try:
-        approved_files = File.query.filter_by(status='ได้รับการอนุมัติจากคณะแล้ว').all()
-        
-        # ตรวจสอบว่าไฟล์ที่ดึงมาจากฐานข้อมูลมีข้อมูลหรือไม่
-        if not approved_files:
-            flash("ยังไม่มีเอกสารที่ได้รับการอนุมัติจากคณะ", "info")
+    users = User.query.all()
+    approved_files = File.query.filter_by(status='ได้รับการอนุมัติจากคณะแล้ว').all()
 
-        # ดึงข้อมูลผู้ใช้ที่เกี่ยวข้องกับไฟล์
-        users = {user.id: user.username for user in User.query.all()}  # สร้าง dictionary ที่เก็บ user_id และ username
-        
-        # ส่งข้อมูลไฟล์และผู้ใช้ไปยังเทมเพลต
-        return render_template('files_approved_faculty.html', files=approved_files, users=users)
+    # ✅ สร้าง dictionary ที่ group ไฟล์ตาม user_id
+    grouped_files = {}
+    for file in approved_files:
+        if file.user_id not in grouped_files:
+            grouped_files[file.user_id] = []
+        grouped_files[file.user_id].append(file)
 
-    except Exception as e:
-        flash(f"เกิดข้อผิดพลาดในการดึงข้อมูล: {str(e)}", "danger")
-        return redirect(url_for('admin_dashboard'))  # Redirect to dashboard in case of failure
+    return render_template('files_approved_faculty.html', users=users, grouped_files=grouped_files)
+
+
+#ตัวเชื่อมอนุมัติจากคณะไปมหาวิทยาลัย
+# ⬇️ วางไว้ใต้ route อื่น ๆ ของ admin ก็ได้
+@app.route('/approved_files/user/<int:user_id>')
+def view_user_approved_files(user_id):
+    """แสดงไฟล์ที่ ‘ได้รับการอนุมัติจากคณะแล้ว’ เฉพาะของ user คนนี้"""
+    user  = User.query.get_or_404(user_id)
+    files = File.query.filter_by(
+                user_id=user_id,
+                status='ได้รับการอนุมัติจากคณะแล้ว'
+            ).all()
+
+    return render_template(
+        'user_approved_files.html',   # สร้าง template ใหม่สั้น ๆ
+        user=user,
+        files=files
+    )
+
+
 
 
     

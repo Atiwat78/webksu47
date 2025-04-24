@@ -1,142 +1,99 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ไฟล์ที่ได้รับการอนุมัติจากคณะ</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f4f7f6;
-            color: #333;
-        }
-        .navbar {
-            background: #343a40;
-        }
-        .container-custom {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-        .file-card {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            transition: 0.3s;
-        }
-        .file-card:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        .status-approved {
-            color: green;
-            font-weight: bold;
-        }
-        .status-pending {
-            color: orange;
-            font-weight: bold;
-        }
-        .status-rejected {
-            color: red;
-            font-weight: bold;
-        }
-        .comment-box {
-            min-height: 80px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            resize: vertical;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>เอกสารที่คณะอนุมัติ (แยกตามผู้ใช้)</title>
+
+  <!-- Bootstrap & Font-Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body{font-family:'Poppins',sans-serif;background:#f4f7f6;color:#000;}
+    .navbar{background:#000;backdrop-filter:blur(10px);}
+    .container-custom{
+       background:#fff;border-radius:12px;padding:30px;
+       box-shadow:0 5px 20px rgba(0,0,0,.2);margin-top:20px;
+    }
+    .user-card{
+       background:rgba(0,0,0,.05);border:2px solid rgba(0,0,0,.2);
+       border-radius:12px;padding:20px;box-shadow:0 5px 15px rgba(0,0,0,.2);
+       transition:.2s;cursor:pointer;position:relative;color:#000;
+    }
+    .user-card:hover{transform:scale(1.05);}
+  </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand ms-2" href="{{ url_for('university_dashboard') }}">
-                <img src="https://upload.wikimedia.org/wikipedia/th/thumb/4/4e/Kalasin_University_Seal.svg/1200px-Kalasin_University_Seal.svg.png" alt="Kalasin University Logo" style="height: 50px; margin-right: 10px;">
-                <strong>Kalasin University</strong>
-            </a>
-            <div class="ms-auto">
-                <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
-                    <img src="{{ url_for('static', filename='images/arrow-white.gif') }}" style="height: 20px; margin-right: 5px;">
-                    ออกจากระบบ
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container container-custom mt-5">
-        <h2>เอกสารที่ได้รับการอนุมัติจากคณะ</h2>
-
-        {% if files %}
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                {% for file in files %}
-                    <div class="col">
-                        <div class="file-card">
-                            <div class="card-body">
-                                <h5 class="card-title"><i class="fas fa-file"></i> {{ file.filename }}</h5>
-                                <p><strong>ผู้ใช้:</strong> {{ file.user.username }}</p>
-                                <p><strong>อีเมล:</strong> {{ file.user.email }}</p>
-
-                                <p><strong>สถานะ:</strong> <span class="text-success">อนุมัติจากคณะ</span></p>
-                                <a href="{{ url_for('view_file', filename=file.filename) }}" class="btn btn-info btn-sm" target="_blank">
-                                    <i class="fas fa-eye"></i> ดูไฟล์
-                                </a>
-                                <button class="btn btn-success btn-sm" onclick="approveFile({{ file.id }})">
-                                    <i class="fas fa-check-circle"></i> อนุมัติ
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="rejectFile({{ file.id }})">
-                                    <i class="fas fa-times-circle"></i> ไม่อนุมัติ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-muted">⛔ ไม่มีเอกสารที่ได้รับการอนุมัติจากคณะ</p>
-        {% endif %}
+<!-- ▸ Navbar ----------------------------------------------------->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand ms-2" href="{{ url_for('university_dashboard') }}">
+      <img src="https://upload.wikimedia.org/wikipedia/th/4/4e/Kalasin_University_Seal.svg"
+           style="height:50px;margin-right:10px">
+      <strong>Kalasin University - Admin</strong>
+    </a>
+    <div class="ms-auto">
+      <a href="{{ url_for('logout') }}" class="btn btn-danger fw-bold px-4 py-2">
+        <i class="fas fa-sign-out-alt me-1"></i> ออกจากระบบ
+      </a>
     </div>
+  </div>
+</nav>
 
-    <script>
-        function approveFile(fileId) {
-            fetch(`/approve_file/${fileId}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload();  // รีเฟรชหน้าหลังจากทำการอนุมัติ
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        }
+<!-- ▸ Content ---------------------------------------------------->
+<div class="container container-custom">
+  <h2 class="mb-4 text-center">
+    📂 เอกสารที่ได้รับการอนุมัติจากคณะ
+  </h2>
 
-        function rejectFile(fileId) {
-            const comment = prompt("กรุณากรอกหมายเหตุสำหรับการไม่อนุมัติ:");
-            if (!comment) return alert("⚠️ กรุณากรอกหมายเหตุ");
+  {% if grouped_files|length == 0 %}
+      <p class="text-muted text-center">⛔ ยังไม่มีเอกสารที่คณะอนุมัติ</p>
+  {% else %}
+    <div class="row">
+      {% for user in users %}
+        {% if user.id in grouped_files %}
+        <div class="col-md-4 mb-4">
+            <div class="user-card p-3">
+          
+              <!-- ชื่อ-อีเมล-คณะ ------------------------------------------------>
+              <h5><i class="fas fa-user"></i> {{ user.username }}</h5>
+              <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+              <p><i class="fas fa-university"></i>
+                 คณะ: {{ user.faculty if user.faculty else 'ไม่ระบุคณะ' }}</p>
+          
+              <!-- Badge จำนวนไฟล์ที่คณะอนุมัติแล้ว ------------------------------>
+              <span class="badge bg-success mb-2">
+                {{ grouped_files[user.id]|length }} ไฟล์ผ่านคณะ
+              </span>
+          
+              <!-- ปุ่มดูไฟล์ --------------------------------------------------->
+              <a href="{{ url_for('view_user_approved_files', user_id=user.id) }}"
+                 class="btn btn-primary w-100 mb-2">
+                 <i class="fas fa-folder-open"></i> ไฟล์ที่อัปโหลด
+              </a>
+          
+              <!-- ปุ่มแก้ไข & ลบ  (🆕) ------------------------------------------>
+              <div class="d-flex justify-content-between">
+                <a href="{{ url_for('edit_user', user_id=user.id) }}"
+                   class="btn btn-warning btn-sm w-50 me-1">
+                   <i class="fas fa-edit"></i> แก้ไข
+                </a>
+          
+                <a href="{{ url_for('delete_user', user_id=user.id) }}"
+                   class="btn btn-danger btn-sm w-50 ms-1"
+                   onclick="return confirm('⚠️ แน่ใจว่าต้องการลบ {{ user.username }} ?');">
+                   <i class="fas fa-trash"></i> ลบ
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
 
-            fetch(`/reject_file/${fileId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ comment: comment })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload();  // รีเฟรชหน้าหลังจากทำการปฏิเสธ
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        }
-    </script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

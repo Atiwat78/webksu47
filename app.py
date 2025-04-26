@@ -869,22 +869,26 @@ def files_approved_faculty():
     return render_template('files_approved_faculty.html', users=users, grouped_files=grouped_files)
 
 
-#ตัวเชื่อมอนุมัติจากคณะไปมหาวิทยาลัย
+#ตัวเชื่อมอนุมัติจากคณะไปมหาวิท
 # ⬇️ วางไว้ใต้ route อื่น ๆ ของ admin ก็ได้
+# app.py  (หรือไฟล์ที่ประกาศ route นี้)
 @app.route('/approved_files/user/<int:user_id>')
 def view_user_approved_files(user_id):
-    """แสดงไฟล์ที่ ‘ได้รับการอนุมัติจากคณะแล้ว’ เฉพาะของ user คนนี้"""
-    user  = User.query.get_or_404(user_id)
-    files = File.query.filter_by(
-                user_id=user_id,
-                status='ได้รับการอนุมัติจากคณะแล้ว'
-            ).all()
+    user = User.query.get_or_404(user_id)
 
-    return render_template(
-        'user_approved_files.html',   # สร้าง template ใหม่สั้น ๆ
-        user=user,
-        files=files
-    )
+    files = File.query.filter(
+        File.user_id == user_id,
+        File.status.in_([
+            'ได้รับการอนุมัติจากคณะแล้ว',
+            'ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว',
+            'ไม่อนุมัติ'                    # ← ใส่ไว้ถ้าอยากโชว์กรณี reject
+        ])
+    ).all()
+
+    return render_template('user_approved_files.html',
+                           user=user,
+                           files=files)
+
 
 
 

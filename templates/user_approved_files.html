@@ -58,78 +58,92 @@
 
     {% for f in files %}
     <div class="file-card">
-      <!-- ชื่อไฟล์ -->
-      <p class="mb-1">
-        <i class="fas fa-file"></i> <strong>{{ f.filename }}</strong>
+    
+      <!-- ✔ เพิ่ม id="status-{{f.id}}"  -->
+      <p id="status-{{f.id}}">
+        📌 สถานะ:
+        {% if f.status == 'ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว' %}
+            <span class="text-primary fw-bold">{{ f.status }}</span>
+        {% elif f.status == 'ได้รับการอนุมัติจากคณะแล้ว' %}
+            <span class="text-success fw-bold">{{ f.status }}</span>
+        {% else %}
+            <span class="text-warning">{{ f.status }}</span>
+        {% endif %}
       </p>
-  
-      <!-- สถานะ -->
-      <p class="mb-2">
-        📌 สถานะ: <span class="status-approved">ได้รับการอนุมัติจากคณะแล้ว</span>
-      </p>
-  
-      <!-- กล่องหมายเหตุ (คณะอาจจะใส่ไว้แล้ว / มหาวิทยาลัยจะใส่เพิ่ม) -->
-      <textarea id="comment-{{ f.id }}" class="form-control mb-2"
+    
+      <textarea id="comment-{{f.id}}" class="form-control mb-2"
                 placeholder="หมายเหตุ (ถ้ามี)">{{ f.comment or '' }}</textarea>
-  
-      <!-- ปุ่มต่าง ๆ -->
+    
       <a href="{{ url_for('uploaded_file', filename=f.filename) }}"
          class="btn btn-info btn-sm me-2" target="_blank">
          <i class="fas fa-eye"></i> ดูไฟล์
       </a>
-  
-      <!-- ✅ ปุ่มอนุมัติ (มหาวิทยาลัย) -->
-      <button class="btn btn-success btn-sm me-2"
-              onclick="approveFile({{ f.id }})">
-        <i class="fas fa-check-circle"></i> อนุมัติ
-      </button>
-  
-      <!-- ❌ ปุ่มไม่อนุมัติ (มหาวิทยาลัย) -->
-      <button class="btn btn-danger btn-sm"
-              onclick="rejectFile({{ f.id }})">
-        <i class="fas fa-times-circle"></i> ไม่อนุมัติ
-      </button>
+    
+      {% if f.status != 'ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว' %}
+          <!-- ✔ ใส่ id ให้ปุ่มด้วย -->
+          <button id="approve-{{f.id}}" class="btn btn-success btn-sm me-2"
+                  onclick="approveFile({{f.id}})">
+            <i class="fas fa-check-circle"></i> อนุมัติ
+          </button>
+          <button id="reject-{{f.id}}" class="btn btn-danger btn-sm"
+                  onclick="rejectFile({{f.id}})">
+            <i class="fas fa-times-circle"></i> ไม่อนุมัติ
+          </button>
+      {% endif %}
+    
     </div>
-  {% endfor %}
+    {% endfor %}
+    
+    
   
-
     <script>
-  /* อนุมัติโดยมหาวิทยาลัย */
-  function approveFile(id){
-    const comment = document.getElementById('comment-'+id).value;
+        /* อนุมัติโดยมหาวิทยาลัย ------------------------------------------ */
+        function approveFile(id){
+          const comment = document.getElementById('comment-'+id).value;
+        
+          fetch(`/approve_file/${id}`,{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({comment})
+          })
+          .then(r=>r.json())
+          .then(d=>{
+              if(d.status!=='success'){ alert(d.message); return; }
+        
+              /* 1) แก้ข้อความและสีทันที */
+              document.getElementById('status-'+id).innerHTML =
+                '📌 สถานะ: <span class="text-primary fw-bold">ได้รับการอนุมัติจากมหาวิทยาลัยแล้ว</span>';
+        
+              /* 2) ปิดปุ่มไม่ให้กดซ้ำ */
+              document.getElementById('approve-'+id).remove();
+              document.getElementById('reject-'+id).remove();
+          });
+        }
+        
+        /* ไม่อนุมัติ ------------------------------------------------------- */
+        function rejectFile(id){
+          const comment = document.getElementById('comment-'+id).value.trim();
+          if(!comment){ alert('⚠️ กรุณากรอกหมายเหตุ'); return; }
+        
+          fetch(`/reject_file/${id}`,{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({comment})
+          })
+          .then(r=>r.json())
+          .then(d=>{
+              if(d.status!=='success'){ alert(d.message); return; }
+        
+              document.getElementById('status-'+id).innerHTML =
+                '📌 สถานะ: <span class="text-danger fw-bold">ไม่อนุมัติ</span>';
+        
+              document.getElementById('approve-'+id).remove();
+              document.getElementById('reject-'+id).remove();
+          });
+        }
+        </script>
+        
 
-    fetch(`/approve_file/${id}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({comment})
-    })
-    .then(r=>r.json())
-    .then(d=>{
-      alert(d.message);
-      location.reload();
-    });
-  }
-
-  /* ไม่อนุมัติโดยมหาวิทยาลัย */
-  function rejectFile(id){
-    const comment = document.getElementById('comment-'+id).value.trim();
-    if(!comment){
-      alert('⚠️ กรุณากรอกหมายเหตุ');
-      return;
-    }
-
-    fetch(`/reject_file/${id}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({comment})
-    })
-    .then(r=>r.json())
-    .then(d=>{
-      alert(d.message);
-      location.reload();
-    });
-  }
-</script>
 
    
 </body>

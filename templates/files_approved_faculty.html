@@ -53,41 +53,42 @@
     <div class="row">
       {% for user in users %}
         {% if user.id in grouped_files %}
-        <div class="col-md-4 mb-4">
-            <div class="user-card p-3">
-          
-              <!-- ชื่อ-อีเมล-คณะ ------------------------------------------------>
-              <h5><i class="fas fa-user"></i> {{ user.username }}</h5>
-              <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
-              <p><i class="fas fa-university"></i>
-                 คณะ: {{ user.faculty if user.faculty else 'ไม่ระบุคณะ' }}</p>
-          
-              <!-- Badge จำนวนไฟล์ที่คณะอนุมัติแล้ว ------------------------------>
-              <span class="badge bg-success mb-2">
-                {{ grouped_files[user.id]|length }} ไฟล์ผ่านคณะ
-              </span>
-          
-              <!-- ปุ่มดูไฟล์ --------------------------------------------------->
-              <a href="{{ url_for('view_user_approved_files', user_id=user.id) }}"
-                 class="btn btn-primary w-100 mb-2">
-                 <i class="fas fa-folder-open"></i> ไฟล์ที่อัปโหลด
-              </a>
-          
-              <!-- ปุ่มแก้ไข & ลบ  (🆕) ------------------------------------------>
-              <div class="d-flex justify-content-between">
-                <a href="{{ url_for('edit_user', user_id=user.id) }}"
-                   class="btn btn-warning btn-sm w-50 me-1">
-                   <i class="fas fa-edit"></i> แก้ไข
-                </a>
-          
-                <a href="{{ url_for('delete_user', user_id=user.id) }}"
-                   class="btn btn-danger btn-sm w-50 ms-1"
-                   onclick="return confirm('⚠️ แน่ใจว่าต้องการลบ {{ user.username }} ?');">
-                   <i class="fas fa-trash"></i> ลบ
-                </a>
-              </div>
-            </div>
-          </div>
+<div class="col-md-4 mb-4">
+  <div class="user-card p-3">
+
+    <!-- ชื่อ-อีเมล-คณะ ------------------------------------------------>
+    <h5><i class="fas fa-user"></i> {{ user.username }}</h5>
+    <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+    <p><i class="fas fa-university"></i>
+        คณะ: {{ user.faculty|faculty_th if user.faculty else 'ไม่ระบุคณะ' }}</p>
+
+    <!-- Badge จำนวนไฟล์ที่คณะอนุมัติแล้ว ------------------------------>
+    <span class="badge bg-success mb-2">
+      {{ grouped_files[user.id]|length }} ไฟล์ผ่านคณะ
+    </span>
+
+    <!-- ปุ่มดูไฟล์ --------------------------------------------------->
+    <a href="{{ url_for('view_user_approved_files', user_id=user.id) }}"
+       class="btn btn-primary w-100 mb-2">
+       <i class="fas fa-folder-open"></i> ไฟล์ที่อัปโหลด
+    </a>
+
+    <!-- ปุ่มแก้ไข & ลบ  (🆕) ------------------------------------------>
+    <div class="d-flex justify-content-between">
+      <a href="{{ url_for('edit_user', user_id=user.id) }}"
+         class="btn btn-warning btn-sm w-50 me-1">
+         <i class="fas fa-edit"></i> แก้ไข
+      </a>
+
+      <a href="{{ url_for('delete_user', user_id=user.id) }}"
+         class="btn btn-danger btn-sm w-50 ms-1"
+         onclick="return confirm('⚠️ แน่ใจว่าต้องการลบ {{ user.username }} ?');">
+         <i class="fas fa-trash"></i> ลบ
+      </a>
+    </div>
+  </div>
+</div>
+
         {% endif %}
       {% endfor %}
     </div>

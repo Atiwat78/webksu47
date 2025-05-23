@@ -159,6 +159,7 @@ def login():
 
 
 
+
 @app.route('/register_user', methods=['GET', 'POST'])
 def register_user():
     if request.method == 'POST':
@@ -936,16 +937,28 @@ def view_user_approved_files(user_id):
 
 @app.route('/logout')
 def logout():
+    # 1) ดึง role เก็บไว้ก่อนล้าง session
     user_role = session.get('role')
-    session.clear()  # ล้าง session
 
-    response = make_response(redirect(url_for('login') if user_role != 'admin' else url_for('admin_login')))
+    # 2) เคลียร์ session
+    session.clear()
+
+    # 3) เลือกหน้าปลายทางตาม role
+    if user_role in ('admin', 'admin_university'):
+        target = url_for('admin_login')   # แอดมินทุกระดับกลับหน้า admin_login
+    else:
+        target = url_for('login')         # ผู้ใช้ทั่วไป
+
+    # 4) แจ้งเตือน
+    flash("✅ ออกจากระบบเรียบร้อย!", "success")
+
+    # 5) ส่ง response พร้อม header no-cache
+    response = make_response(redirect(target))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    
-    flash("ออกจากระบบเรียบร้อย!", "success")
+    response.headers['Pragma']        = 'no-cache'
+    response.headers['Expires']       = '0'
     return response
+
 
 
 

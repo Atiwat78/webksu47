@@ -1,41 +1,74 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบแอดมิน</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบแอดมิน</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- ไฟล์ CSS หลักของแอป (ถ้ามี) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+  <link rel="icon"
+        href="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}"
+        type="image/x-icon">
+
+  <!-- สไตล์ alert (เสริมสำหรับกรณีไม่ได้ใช้ Bootstrap) -->
+  <style>
+    .alert{
+      padding:10px 14px;
+      border-radius:6px;
+      margin-top:12px;
+      font-size:0.9rem;
+    }
+    .alert-danger{background:#d9534f;color:#fff;}
+    .alert-success{background:#5cb85c;color:#fff;}
+  </style>
 </head>
+
 <body class="d-flex align-items-center justify-content-center vh-100 bg-light">
-    <div class="card p-4 shadow-lg text-center" style="width: 400px;">
-        <!-- โลโก้ -->
-        <div class="mb-3">
-            <img src="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}" alt="Logo" width="100">
-        </div>
+  <div class="card p-4 shadow-lg text-center" style="width:400px;">
+      <!-- โลโก้ -->
+<img src="{{ url_for('static', filename='images/Kalasin_University_Seal.svg.png') }}"
+     alt="Logo" width="100"
+     class="d-block mx-auto mb-3">
 
-        <h2 class="mb-3">เข้าสู่ระบบแอดมิน</h2>
 
-        <form method="POST">
-            <div class="mb-3 text-start">
-                <label for="username" class="form-label">ชื่อผู้ใช้</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="กรอกชื่อผู้ใช้" required>
-            </div>
-        
-            <div class="mb-3 text-start">
-                <label for="password" class="form-label">รหัสผ่าน</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="กรอกรหัสผ่าน" required>
-            </div>
-        
-      
-        
-            <button type="submit" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
-        </form>
-        
+      <h2 class="mb-3">เข้าสู่ระบบแอดมิน</h2>
 
-    
+      <form method="POST">
+          <div class="mb-3 text-start">
+              <label for="username" class="form-label">ชื่อผู้ใช้</label>
+              <input type="text"
+                     id="username" name="username" class="form-control"
+                     value="{{ request.form.get('username','') }}"
+                     placeholder="กรอกชื่อผู้ใช้" required>
+          </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          <div class="mb-3 text-start">
+              <label for="password" class="form-label">รหัสผ่าน</label>
+              <input type="password"
+                     id="password" name="password" class="form-control"
+                     placeholder="กรอกรหัสผ่าน" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+
+          <!-- flash message ใต้ปุ่ม -->
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+      </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

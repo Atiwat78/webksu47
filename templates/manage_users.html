@@ -51,8 +51,22 @@
             transition: 0.2s;
         }
         .delete-btn:hover {
-            background: darkred;
+            background: darkred;   
         }
+        /* 🔸 ปุ่มแก้ไขใหม่ */
+    .edit-btn {
+        position: absolute;
+        top: 10px;
+        right: 55px;           /* ขยับซ้ายเล็กน้อยจากปุ่มลบ */
+        background: #ffc107;   /* เหลือง Bootstrap warning */
+        color: #000;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .edit-btn:hover { background: #e0a800; }
     </style>
 </head>
 <body>
@@ -94,33 +108,45 @@
             </a>
         </div>
 
-        <div class="row">
-            {% for user in users %}
-            <div class="col-md-4 mb-4">
-                <div class="user-card p-3">
-                    <h5><i class="fas fa-user"></i> {{ user.username }}</h5>
-                    <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
-                    <p><i class="fas fa-circle" style="color: {% if user.status == 'active' %}green{% else %}red{% endif %};"></i> {{ user.status }}</p>
+        <!-- ✅ กำหนดกริดให้สวยขึ้น – 1 คอลัมน์บนจอเล็ก, 2 บน md, 3 บน lg -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for user in users %}
+    <div class="col">
+        <!-- h-100 + d-flex + flex-column ทำให้การ์ดสูงเท่ากัน แล้วปุ่มชิดล่าง -->
+        <div class="user-card p-3 h-100 d-flex flex-column">
 
-                    <p><strong>บทบาท: </strong><span style="color: green;">{{ user.role }}</span></p>
+            <!-- 🔹 ข้อมูลผู้ใช้ -->
+            <h5><i class="fas fa-user"></i> {{ user.username }}</h5>
+            <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+            <p>
+                <i class="fas fa-circle"
+                   style="color: {{ 'green' if user.status == 'active' else 'red' }};"></i>
+                {{ user.status }}
+            </p>
+            <p><strong>บทบาท: </strong><span style="color: green;">{{ user.role }}</span></p>
 
+            <!-- 🔹 กลุ่มปุ่ม (ดันลงล่างด้วย mt-auto) -->
+            <div class="d-flex gap-2 mt-auto">
+                
 
-                    
-                    <div class="d-flex justify-content-between mt-3">
-                        <!-- ✅ ปุ่มดูไฟล์ -->
-                        <a href="{{ url_for('view_user', user_id=user.id) }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-folder"></i> ไฟล์ที่อัปโหลด
-                        </a>
-                        <!-- ✅ ปุ่มลบ -->
-                        <button class="delete-btn" onclick="confirmDelete('{{ user.id }}', '{{ user.username }}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
+                <!-- แก้ไข -->
+                <a href="{{ url_for('edit_user', user_id=user.id) }}"
+                   class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit"></i>
+                </a>
+
+                <!-- ลบ -->
+                <button class="btn btn-danger btn-sm"
+                        onclick="confirmDelete('{{ user.id }}', '{{ user.username }}')">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-            {% endfor %}
-        </div>
-    </div>
+
+        </div> <!-- /user-card -->
+    </div> <!-- /col -->
+    {% endfor %}
+</div> <!-- /row -->
+
 
     <script>
         function confirmDelete(userId, username) {

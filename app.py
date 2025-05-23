@@ -121,9 +121,17 @@ def allowed_file(filename):
 def home():
     return render_template('home.html')
 
-# ✅ Route: Login
+# ---------- LOGIN ----------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # a) ถ้าเคยล็อกอินอยู่แล้ว (ยังมี session) → เด้งกลับ Dashboard
+    if session.get('user_id') and session.get('role') == 'user':
+        return redirect(url_for('user_dashboard'))
+    if session.get('user_id') and session.get('role') in ['admin', 'admin_university']:
+        return redirect(url_for('admin_dashboard')
+                        if session['role'] == 'admin' else url_for('university_dashboard'))
+
+    # b) ตรวจรหัสผ่านตามเดิม
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -133,10 +141,19 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             session['role'] = user.role
-            return redirect(url_for('user_dashboard')) if user.role == 'user' else redirect(url_for('admin_dashboard'))
+            return redirect(url_for('user_dashboard')) if user.role == 'user' \
+                   else redirect(url_for('admin_dashboard'))
 
         flash("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!", "danger")
-    return render_template('login.html')
+
+    # c) ส่ง header no-store กลับเสมอ
+    resp = make_response(render_template('login.html'))
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma']        = 'no-cache'
+    resp.headers['Expires']       = '0'
+    return resp
+
+
 
 
 
@@ -701,18 +718,28 @@ def manage_users():
 
 #เเก้ไขผู้ใช้
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@admin_required      # <-- แนะนำติดเพื่อกันคนทั่วไปเข้ามา
 def edit_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        flash("ไม่พบผู้ใช้ที่ต้องการแก้ไข", "danger")
-        return redirect(url_for('admin_dashboard'))
+    user = User.query.get_or_404(user_id)
 
     if request.method == 'POST':
         user.username = request.form['username']
-        user.email = request.form['email']
+        user.email    = request.form['email']
+
+        # เปลี่ยนรหัสผ่านถ้ากรอก
+        if request.form['password']:
+            user.password = request.form['password']   # TODO: เข้ารหัส
+
         db.session.commit()
-        flash("อัปเดตข้อมูลสำเร็จ", "success")
-        return redirect(url_for('admin_dashboard'))
+        flash("✅ อัปเดตข้อมูลสำเร็จ", "success")
+
+        # ➜ กลับหน้าคุม user ตาม role
+        if session.get('role') == 'admin_university':
+            return redirect(url_for('university_dashboard'))
+        return redirect(url_for('admin_dashboard'))    # admin คณะ
+
+    return render_template('edit_user.html', user=user)
+
 
     return render_template('edit_user.html', user=user)
 #ดูยูส

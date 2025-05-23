@@ -96,6 +96,18 @@
         
     </style>
 </head>
+<!-- วางก่อน </body> -->
+<script>
+  // 1) เพิ่ม State ปลอมเข้าไปใน stack
+  history.pushState(null, "", location.href);
+
+  // 2) ถ้าผู้ใช้กด back → onpopstate จะยิง
+  window.onpopstate = () => {
+      // ดันกลับไปข้างหน้าอีกที (จึงดูเหมือนกด back แล้วไม่ขยับ)
+      history.pushState(null, "", location.href);
+  };
+</script>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
@@ -219,7 +231,14 @@
                 
                         
                 
-                
+                <script>
+  // ถ้า Browser พยายามย้อนกลับ ให้ดันกลับไปข้างหน้า
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = function () {
+      window.history.pushState(null, "", window.location.href);
+  };
+</script>
+
 
 
               

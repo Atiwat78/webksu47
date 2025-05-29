@@ -153,9 +153,13 @@
                             <div id="collapse{{ file.id }}" class="accordion-collapse collapse {% if file.status == 'อนุมัติแล้ว' %}show{% endif %}" 
                                  aria-labelledby="heading{{ file.id }}" data-bs-parent="#fileStatusAccordion">
 
+
+                                 
+
                                 <!-- ไทม์ไลน์ -->
                                 <div class="accordion-body">
                                     <p><strong>ชื่อไฟล์:</strong> {{ file.filename }}</p>
+                                    
                                     
                                     <!-- (1) ปุ่ม "ดูรายละเอียด"  -->
                                     <button class="btn btn-info btn-sm mb-2" 
@@ -166,6 +170,16 @@
                                             aria-controls="detail_{{ file.id }}">
                                         ดูรายละเอียด
                                     </button>
+
+                                    <!-- ปุ่มลบไฟล์ (ทำงานจริง) -->
+                                <form action="{{ url_for('delete_file', file_id=file.id) }}" method="POST" 
+                                    onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้?');" class="d-inline-block mb-2">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i> ลบไฟล์
+                                </button>
+                                </form>
+
+                                        
                                     
                                     <!-- (2) ส่วนข้อมูลที่จะซ่อน/แสดง -->
                                     <div id="detail_{{ file.id }}" class="collapse">

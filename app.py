@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 
 
 
+
+
 # ✅ ตั้งค่าแอป Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -159,6 +161,7 @@ def login():
 
 
 
+#สมัครสมาชิก
 
 @app.route('/register_user', methods=['GET', 'POST'])
 def register_user():
@@ -213,9 +216,11 @@ def upload_profile():
     user = User.query.get(session['user_id'])
 
     file_fields = [
-        "file_teaching", "file_teaching_rsu", "file_research",
-        "file_mko03", "file_pp1", "file_evaluation", "file_academic"
-    ]
+    "file_teaching", "file_teaching_rsu", "file_research",
+    "file_mko03", "file_pp1", "file_evaluation",
+    "file_academic_book", "file_academic_participation", "file_academic_certificate"
+]
+
 
     files_uploaded = 0  # ตัวนับไฟล์ที่อัปโหลดสำเร็จ
 
@@ -345,25 +350,26 @@ def manage_requests():
 def view_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# ✅ Route: Delete File
-@app.route('/delete_file/<int:file_id>')
+@app.route('/delete_file/<int:file_id>', methods=['POST'])
 def delete_file(file_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
     file = File.query.get(file_id)
     if file and (session.get('role') == 'admin' or file.user_id == session['user_id']):
-        # ✅ ใช้ path จาก UPLOAD_FOLDER
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        
-        if os.path.exists(file_path):  # ✅ ตรวจสอบว่าไฟล์มีอยู่ก่อนลบ
-            os.remove(file_path)
+        try:
+            os.remove(file.file_path)
+        except Exception as e:
+            print(f"Error deleting file: {e}")
 
-        db.session.delete(file)    
+        db.session.delete(file)
         db.session.commit()
         flash("✅ ลบไฟล์สำเร็จ!", "success")
+    else:
+        flash("❌ ไม่พบไฟล์ หรือคุณไม่มีสิทธิ์ลบไฟล์นี้", "danger")
 
-    return redirect(url_for('profile'))
+    return redirect(url_for('status'))
+
 
 
 

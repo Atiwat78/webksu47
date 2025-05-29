@@ -122,135 +122,147 @@
                 ✅ กำหนดให้ทุกช่องต้องอัปโหลด (required) และใช้ชื่อไม่ซ้ำกันทั้ง 9 ช่อง
                 เพิ่ม JavaScript ป้องกันการส่งฟอร์มถ้ายังไม่ครบ
             -->
-            <form id="uploadForm" action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <h5>เอกสาร ก.พ.อ.๐๓</h5>
-                    <a href="{{ url_for('static', filename='forms/ก.พ.อ.03 พ.ศ. 2563.docx') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
-                        แบบฟอร์ม ก.พ.อ.๐๓
-                    </a>
-                    <input type="file" name="file_teaching" id="file_teaching" required class="form-control">
-                </div>
-                
-                <div class="mb-3">
-                    <h5>แบบ ปพ.1</h5>
-                    <a href="{{ url_for('static', filename='forms/แบบ ปผ1.doc') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
-                        แบบฟอร์ม ปพ.1
-                    </a>
-                    <input type="file" name="file_teaching_rsu" id="file_teaching_rsu" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>มคอ.๐๓</h5>
-                    <input type="file" name="file_research" id="file_research" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>ผลการประเมินการสอน</h5>
-                    <input type="file" name="file_mko03" id="file_mko03" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>ตารางสอนปีศึกษา ๒๕๖๘ ภาคเรียนที่ 1</h5>
-                    <input type="file" name="file_pp1" id="file_pp1" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>ผลงานทางวิชาการ</h5>
-                    <input type="file" name="file_evaluation" id="file_evaluation" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>รูปเล่มทางวิชาการ</h5>
-                    <input type="file" name="file_academic_book" id="file_academic_book" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>แบบแสดงหลักฐานการมีส่วนร่วมทางวิชาการ</h5>
-                    <a href="{{ url_for('static', filename='forms/แบบแสดงหลักฐานการมีส่วนร่วมในผลงานทางวิชาการ.doc') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
-                        แบบแสดงหลักฐานการมีส่วนร่วมในผลงานทางวิชาการ
-                    </a>
-                    <input type="file" name="file_academic_participation" id="file_academic_participation" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <h5>หนังสือรับรองผลงานวิจัย</h5>
-                    <a href="{{ url_for('static', filename='forms/หนังสือรับรองการเผยแพร่ผลงานทางวิชาการ.doc') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
-                        หนังสือรับรองผลงานวิจัย
-                    </a>
-                    <input type="file" name="file_academic_certificate" id="file_academic_certificate" accept=".pdf, .doc, .docx" required class="form-control">
-                </div>
-
-                <button type="submit" class="btn btn-success fw-bold px-4 py-2">
-                    <i class="fas fa-upload"></i> Upload
-                </button>
-            </form>
-
-            <!-- Success Message -->
-            <div id="success-message">
-                <img src="static/images/contatatatat585885.gif" alt="Success" style="width: 40px; height: 40px; margin-right: 10px;">
-                <i class="fas fa-check-circle"></i> อัปโหลดไฟล์สำเร็จ!
-            </div>                  
-            </ul>
-        </div>
+{% if not already_uploaded %}
+<form id="uploadForm" action="{{ url_for('upload_profile') }}" method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+        <h5>เอกสาร ก.พ.อ.๐๓</h5>
+        <a href="{{ url_for('static', filename='forms/ก.พ.อ.03 พ.ศ. 2563.docx') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
+            แบบฟอร์ม ก.พ.อ.๐๓
+        </a>
+        <input type="file" name="file_teaching" id="file_teaching" required class="form-control">
     </div>
+
+    <div class="mb-3">
+        <h5>แบบ ปพ.1</h5>
+        <a href="{{ url_for('static', filename='forms/แบบ ปผ1.doc') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
+            แบบฟอร์ม ปพ.1
+        </a>
+        <input type="file" name="file_teaching_rsu" id="file_teaching_rsu" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>มคอ.๐๓</h5>
+        <input type="file" name="file_research" id="file_research" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>ผลการประเมินการสอน</h5>
+        <input type="file" name="file_mko03" id="file_mko03" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>ตารางสอนปีศึกษา ๒๕๖๘ ภาคเรียนที่ 1</h5>
+        <input type="file" name="file_pp1" id="file_pp1" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>ผลงานทางวิชาการ</h5>
+        <input type="file" name="file_evaluation" id="file_evaluation" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>รูปเล่มทางวิชาการ</h5>
+        <input type="file" name="file_academic_book" id="file_academic_book" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>แบบแสดงหลักฐานการมีส่วนร่วมทางวิชาการ</h5>
+        <a href="{{ url_for('static', filename='forms/แบบแสดงหลักฐานการมีส่วนร่วมในผลงานทางวิชาการ.doc') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
+            แบบแสดงหลักฐานการมีส่วนร่วมในผลงานทางวิชาการ
+        </a>
+        <input type="file" name="file_academic_participation" id="file_academic_participation" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <h5>หนังสือรับรองผลงานวิจัย</h5>
+        <a href="{{ url_for('static', filename='forms/หนังสือรับรองการเผยแพร่ผลงานทางวิชาการ.doc') }}" class="btn btn-sm btn-primary mt-2 mb-2" download>
+            หนังสือรับรองผลงานวิจัย
+        </a>
+        <input type="file" name="file_academic_certificate" id="file_academic_certificate" accept=".pdf, .doc, .docx" required class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-success fw-bold px-4 py-2">
+        <i class="fas fa-upload"></i> Upload
+    </button>
+</form>
+
+<!-- ✅ แสดงข้อความอัปโหลดสำเร็จหลัง redirect -->
+<div id="success-message">
+    <img src="static/images/contatatatat585885.gif" alt="Success" style="width: 40px; height: 40px; margin-right: 10px;">
+    <i class="fas fa-check-circle"></i> อัปโหลดไฟล์สำเร็จ!
+</div>
+{% else %}
+<!-- ❌ ถ้าเคยอัปโหลดครบแล้ว ไม่ให้ส่งซ้ำ -->
+<div class="alert alert-success mt-4">
+    <i class="fas fa-check-circle"></i> คุณได้ส่งเอกสารครบ 9 ไฟล์เรียบร้อยแล้ว ไม่สามารถส่งซ้ำได้อีก
+</div>
+{% endif %}
+
     
     <script>
-        // ซ่อนตัวโหลดเมื่อหน้าเสร็จ
-        window.onload = function () {
-            document.getElementById("preloader").style.display = "none";
-        };
+    window.onload = function () {
+        document.getElementById("preloader").style.display = "none";
 
-        // ตรวจสอบให้ครบทั้ง 9 ช่องก่อนส่ง
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('uploadForm');
-            const fileInputs = form.querySelectorAll('input[type="file"][required]');
-            const submitBtn = form.querySelector('button[type="submit"]');
-
-            const validate = () => {
-                let filled = true;
-                fileInputs.forEach(input => {
-                    if (input.files.length === 0) {
-                        filled = false;
-                        input.classList.add('is-invalid');
-                    } else {
-                        input.classList.remove('is-invalid');
-                    }
-                });
-                submitBtn.disabled = !filled;
-            };
-
-            // ตรวจทุกครั้งที่เปลี่ยนไฟล์
-            fileInputs.forEach(input => input.addEventListener('change', validate));
-            validate(); // เรียกครั้งแรกเพื่อปิดปุ่มไว้ก่อน
-
-            form.addEventListener('submit', function (e) {
-                if (submitBtn.disabled) {
-                    e.preventDefault();
-                    alert('กรุณาเลือกไฟล์ให้ครบทั้ง 9 ช่องก่อนส่งข้อมูล');
-                }
-            });
-        });
-
-        // แสดงข้อความสำเร็จ (ไฟล์อัปโหลดสำเร็จ)
-        function showSuccessMessage(event) {
-            event.preventDefault();
+        // ✅ แสดงข้อความสำเร็จหลัง redirect
+        if (sessionStorage.getItem("uploadSuccess")) {
             const message = document.getElementById("success-message");
             message.style.display = "block";
+            sessionStorage.removeItem("uploadSuccess");
             setTimeout(() => message.style.display = "none", 5000);
         }
+    };
 
-        // ออกจากระบบ
-        function logout() {
-            window.location.href = "{{ url_for('logout') }}";
-            setTimeout(() => window.location.replace("{{ url_for('login') }}"), 100);
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('uploadForm');
+        const fileInputs = form.querySelectorAll('input[type="file"][required]');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+    const validate = () => {
+    let filledCount = 0;
+    fileInputs.forEach(input => {
+        if (input.files.length > 0) {
+            filledCount++;
+            input.classList.remove('is-invalid');
+        } else {
+            input.classList.add('is-invalid');
         }
+    });
+    // ✅ ต้องครบ 9 ช่องเท่านั้น
+    submitBtn.disabled = filledCount !== 9;
+};
 
-        // ป้องกันการย้อนกลับหลังจากออกระบบ
-        (function () {
-            window.history.pushState(null, "", window.location.href);
-            window.onpopstate = () => window.history.pushState(null, "", window.location.href);
-        })();
-    </script>
+
+        fileInputs.forEach(input => input.addEventListener('change', validate));
+        validate();
+
+        // ✅ เมื่อกด Submit
+        form.addEventListener('submit', function (e) {
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                alert('กรุณาเลือกไฟล์ให้ครบทั้ง 9 ช่องก่อนส่งข้อมูล');
+                return;
+            }
+
+            // ✅ ป้องกันส่งซ้ำ + แสดงกำลังส่ง
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่ง...';
+            sessionStorage.setItem("uploadSuccess", true);  // ส่งสำเร็จ → เตรียมแสดง popup
+        });
+    });
+
+    // ออกจากระบบ
+    function logout() {
+        window.location.href = "{{ url_for('logout') }}";
+        setTimeout(() => window.location.replace("{{ url_for('login') }}"), 100);
+    }
+
+    // ป้องกันการย้อนกลับหลังจากออกระบบ
+    (function () {
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = () => window.history.pushState(null, "", window.location.href);
+    })();
+</script>
+
     
 </body>
 </html>

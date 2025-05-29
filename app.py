@@ -303,6 +303,9 @@ def profile():
     user  = User.query.get(session['user_id'])
     files = File.query.filter_by(user_id=user.id).all()
 
+    # ✅ ตรวจว่ามีไฟล์ครบ 9 หรือยัง
+    already_uploaded = len(files) >= 9
+
     # ↘️  ตารางแปลคณะ
     th = {
         'engineering': 'วิศวกรรมศาสตร์',
@@ -318,9 +321,11 @@ def profile():
         username=user.username,
         email   =user.email,
         role    =user.role,
-        faculty =th.get(user.faculty, user.faculty),   # ส่งชื่อไทย
-        files   =files
+        faculty =th.get(user.faculty, user.faculty),
+        files   =files,
+        already_uploaded=already_uploaded   # ✅ ส่ง flag นี้ไปด้วย
     )
+
 
 
 
